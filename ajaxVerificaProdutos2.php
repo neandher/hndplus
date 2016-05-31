@@ -16,120 +16,142 @@ $html = new Simple_html_dom($result['exec']);
 
 $captcha = $html->find('div[id=divQuadro]');
 
-$letra1 = $captcha[0]->nodes[0]->parent->children[0]->nodes[0]->_[4];
-$letra2 = $captcha[0]->nodes[0]->parent->children[1]->nodes[0]->_[4];
-$letra3 = $captcha[0]->nodes[0]->parent->children[2]->nodes[0]->_[4];
-$letra4 = $captcha[0]->nodes[0]->parent->children[3]->nodes[0]->_[4];
+if (count($captcha) > 0) {
 
-$captchaDecode = $letra1 . $letra2 . $letra3 . $letra4;
+    $letra1 = $captcha[0]->nodes[0]->parent->children[0]->nodes[0]->_[4];
+    $letra2 = $captcha[0]->nodes[0]->parent->children[1]->nodes[0]->_[4];
+    $letra3 = $captcha[0]->nodes[0]->parent->children[2]->nodes[0]->_[4];
+    $letra4 = $captcha[0]->nodes[0]->parent->children[3]->nodes[0]->_[4];
 
-$url = 'https://vo.hinode.com.br/vo-2/rede_login1.asp';
+    $captchaDecode = $letra1 . $letra2 . $letra3 . $letra4;
 
-$post = array(
-    'login_tipo_id' => 'idconsultor',
-    'rede_usuario' => HND_USER,
-    'rede_senha' => HND_PASS,
-    'txtValor' => $captchaDecode,
-    'entrar' => 'Entrar'
-);
+    $url = 'https://vo.hinode.com.br/vo-2/rede_login1.asp';
 
-$post_fields = http_build_query($post, null, '&');
+    $post = array(
+        'login_tipo_id' => 'idconsultor',
+        'rede_usuario' => HND_USER,
+        'rede_senha' => HND_PASS,
+        'txtValor' => $captchaDecode,
+        'entrar' => 'Entrar'
+    );
 
-$result = CurlHelper::curlPost($url, $post_fields, $cookieFile);
+    $post_fields = http_build_query($post, null, '&');
 
-if (strstr($result['exec'], '<a HREF="vo-inicio.asp">here</a>')) {
+    $result = CurlHelper::curlPost($url, $post_fields, $cookieFile);
 
-    $url = 'https://vo.hinode.com.br/vo-2/vo3-gera-pedido.asp';
+    if (strstr($result['exec'], '<a HREF="vo-inicio.asp">here</a>')) {
 
-    $result = CurlHelper::curl($url, false, false, $cookieFile);
+        $url = 'https://vo.hinode.com.br/vo-2/vo3-gera-pedido.asp';
 
-    $html = new Simple_html_dom($result['exec']);
+        $result = CurlHelper::curl($url, false, false, $cookieFile);
 
-    $ss_pg = $html->find('input[id=ss_pg]')[0]->attr['value'];
+        $html = new Simple_html_dom($result['exec']);
 
-    $idconsultor = HND_USER;
+        $find_ss_pg = $html->find('input[id=ss_pg]');
 
-    $searchProdutos = explode(',', $_GET['cod_produtos']);
+        if(is_null($find_ss_pg)){
+            echo 'Houve um erro ao acessar o sistema da hinode. Erro 3';
+            exit;
+        }
 
-    $searchCDH = explode(',', $_GET['cod_franquias']);
+        $ss_pg = $find_ss_pg[0]->attr['value'];
 
-    // *************** Verifica/Adiciona Produto ****************** //
+        $idconsultor = HND_USER;
 
-    $success = false;
+        $searchProdutos = explode(',', $_GET['cod_produtos']);
 
-    $a_cdh = array();
-    $data_cdh = array();
+        $searchCDH = explode(',', $_GET['cod_franquias']);
 
-    $db = new MySqlPDO();
+        // *************** Verifica/Adiciona Produto ****************** //
 
-    foreach ($searchCDH as $val_cdh) {
+        $success = false;
 
-        if (!empty($val_cdh)) {
+        $a_cdh = array();
+        $data_cdh = array();
 
-            if (!in_array($val_cdh, $a_cdh)) {
+        $db = new MySqlPDO();
 
-                $a_cdh[] = $val_cdh;
+        foreach ($searchCDH as $val_cdh) {
 
-                foreach ($searchProdutos as $val_prod) {
+            if (!empty($val_cdh)) {
 
-                    $post = array(
-                        'acao' => 'car_add_item',
-                        'idconsultor' => $idconsultor,
-                        'id_cdhret' => $val_cdh,
-                        'loc_prod' => $val_prod,
-                        'qtd_prod' => '1',
-                        'ss_pg' => $ss_pg,
-                        'regra_estoque' => '0',
-                        'atv_cons' => '0',
-                        'atv_cad_cons' => '1',
-                        'vl_sub_ped' => '0.00',
-                        'valor_minimo_kit' => '0.00',
-                        'ponto_minimo_kit' => '0.00',
-                        'atv_cons_bkp' => '0',
-                        'atv_cad_cons_bkp' => '1',
-                    );
+                if (!in_array($val_cdh, $a_cdh)) {
 
-                    $result = executaAcaoProdutos($post, $cookieFile, true);
+                    $a_cdh[] = $val_cdh;
 
-                    if ($result['exec'] == '') {
+                    foreach ($searchProdutos as $val_prod) {
 
-                        $data_cdh[$val_cdh][] = $val_prod;
+                        $post = array(
+                            'acao' => 'car_add_item',
+                            'idconsultor' => $idconsultor,
+                            'id_cdhret' => $val_cdh,
+                            'loc_prod' => $val_prod,
+                            'qtd_prod' => '1',
+                            'ss_pg' => $ss_pg,
+                            'regra_estoque' => '0',
+                            'atv_cons' => '0',
+                            'atv_cad_cons' => '1',
+                            'vl_sub_ped' => '0.00',
+                            'valor_minimo_kit' => '0.00',
+                            'ponto_minimo_kit' => '0.00',
+                            'atv_cons_bkp' => '0',
+                            'atv_cad_cons_bkp' => '1',
+                        );
+
+                        $result = executaAcaoProdutos($post, $cookieFile, true);
+
+                        if ($result['exec'] == '') {
+
+                            $data_cdh[$val_cdh][] = $val_prod;
+                            var_dump($result['exec']);
+                        }
                     }
-                }
 
+                }
             }
         }
-    }
 
-    $str = '';
+        if (count($data_cdh) > 0) {
 
-    $str = '<div class="panel panel-default">';
+            $str = '';
 
-    $a_cdh = array();
+            $str = '<div class="panel panel-default">';
 
-    foreach ($data_cdh as $ind => $val) {
+            $a_cdh = array();
 
-        if (!in_array($ind, $a_cdh)) {
+            foreach ($data_cdh as $ind => $val) {
 
-            $a_cdh[] = $ind;
-            $str .= '<div class="panel-heading"><strong>' . getCdh($ind, $db) . '</strong></div>';
+                if (!in_array($ind, $a_cdh)) {
+
+                    $a_cdh[] = $ind;
+                    $str .= '<div class="panel-heading"><strong>' . getCdh($ind, $db) . '</strong></div>';
+                }
+
+                $str .= '<ul class="list-group">';
+
+                foreach ($val as $prod) {
+                    $str .= '<li class="list-group-item">' . getProd($prod, $db) . '</li>';
+                }
+
+                $str .= '</ul>';
+            }
+
+            $str .= '</div>';
+
+            echo $str;
+
+            unlink($cookieFile);
+
+        } else {
+            echo 'Nenhum resultado encontrado';
         }
-
-        $str .= '<ul class="list-group">';
-
-        foreach ($val as $prod) {
-            $str .= '<li class="list-group-item">' . getProd($prod, $db) . '</li>';
-        }
-
-        $str .= '</ul>';
+    } else {
+        echo 'Houve um erro ao acessar o sistema da hinode. Erro 2';
     }
-
-    $str .= '</div>';
-
-    echo $str;
 }
-
-unlink($cookieFile);
+else{
+    echo 'Houve um erro ao acessar o sistema da hinode. Erro 1';
+}
 
 function executaAcaoProdutos($post, $cookieFile, $isPost = false)
 {

@@ -87,7 +87,7 @@ require("config.php");
                     <div id="filter_linha_prod_results"></div>
 
                 </div>
-                
+
                 <div role="tabpanel" class="tab-pane" id="tab_franquias">
 
                     <br>
@@ -171,7 +171,14 @@ require("config.php");
         executaProcesso();
     }
 
+    var startDate;
+    var endDate;
+    var log_duracao;
+    var txtDuracao;
+
     function executaProcesso() {
+
+        startDate = new Date();
 
         var result_loading = `<ul class="list-group" id="result_loading">
             <li id="lgi" class="list-group-item">
@@ -192,6 +199,30 @@ require("config.php");
             .done(function (data) {
 
                 $('#result').html(data);
+
+                endDate = new Date();
+
+                ms = endDate.getTime() - startDate.getTime();
+
+                s = Math.round((ms / 1000) % 60);
+                m = Math.round((ms / (1000 * 60)) % 60);
+                h = Math.round((ms / (1000 * 60 * 60)) % 24);
+
+                if (s == 60) {
+
+                    s = s - 1;
+                }
+
+                if (m == 60) {
+
+                    m = m - 1;
+                }
+
+                txtDuracao = h + 'h ' + m + 'm ' + s + 's';
+
+                log_duracao = h + ':' + m + ':' + s;
+
+                $('#result').append('<p>Tempo da pesquisa: ' + txtDuracao + '</p>');
             })
     }
 
@@ -280,7 +311,7 @@ require("config.php");
         $('#filter_prod').val('');
         $('#filter_prod').focus();
     }
-    
+
     function updateCodFran(val) {
         cod_fran = $("#cod_franquias").val();
         $("#cod_franquias").val(cod_fran + val + ',');
