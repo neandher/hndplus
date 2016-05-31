@@ -1,10 +1,10 @@
 <?php
 
-session_start();
-
 define('BASE_PATH', dirname(realpath(__FILE__)) . '/');
 
-define('BASE_URL', 'http://localhost:8080/sistemas/scripthinode/');
+//define('BASE_URL', 'http://localhost:8080/sistemas/scripthinode/');
+
+define('BASE_URL', 'http://localhost/hndplus/');
 
 define('TEMP_PATH', BASE_PATH . 'Temp/');
 
@@ -20,9 +20,14 @@ define('HND_PASS', '@123#HND$');
 
 //define('HND_PASS', 'andrehnd@2015');
 
-define('DB_HOST_MYSQL','localhost:3307');
+/*define('DB_HOST_MYSQL','localhost:3307');
 define('DB_USER_MYSQL','root');
 define('DB_PASS_MYSQL','');
+define('DB_NAME_MYSQL','hnd_plus');*/
+
+define('DB_HOST_MYSQL','localhost');
+define('DB_USER_MYSQL','root');
+define('DB_PASS_MYSQL','root');
 define('DB_NAME_MYSQL','hnd_plus');
 
 // Configuração de Email

@@ -4,16 +4,7 @@ ini_set('max_execution_time', 100000);
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require("config.php");
-require("Helpers/CurlHelper.php");
-require("Helpers/EmailHelper.php");
-require("Helpers/phpmailer/PHPMailer.php");
-require('Helpers/Simple_html_dom.php');
-require('Helpers/LoggedExceptionHelper.php');
-require('Database/MySqlPDO.php');
-require('Helpers/SelectSqlHelper.php');
-
-$_GET['filter'] = utf8_decode($_GET['filter']);
+require_once("ajaxIncludes.php");
 
 $innerJoin = " inner join uf as uf on uf.sigla = fra.state ";
 
@@ -44,11 +35,11 @@ if (count($sql) > 0) {
             foreach ($sql as $ind => $val) {
                 ?>
                 <a href="#" class="list-group-item" onclick="updateCodFran('<?php echo $val['code'] ?>')">
-                    <h4 class="list-group-item-heading"><?php echo utf8_encode($val['description']) ?></h4>
+                    <h4 class="list-group-item-heading"><?php echo utf8_decode($val['description']) ?></h4>
                     <p class="list-group-item-text">
-                        <?php echo utf8_encode($val['district']) . ' / ' . utf8_encode(
+                        <?php echo utf8_decode($val['district']) . ' / ' . utf8_decode(
                                 $val['city']
-                            ) . ' / ' . utf8_encode($val['state']) ?>
+                            ) . ' / ' . utf8_decode($val['state']) ?>
                     </p>
                 </a>
                 <?php

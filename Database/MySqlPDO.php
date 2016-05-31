@@ -69,7 +69,7 @@ class MySqlPDO {
 
         }
 
-        echo $con.'<br><br>';
+        //echo $con.'<br><br>';
         //var_dump($select->orderby);
         //exit;
 

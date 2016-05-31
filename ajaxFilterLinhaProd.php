@@ -4,16 +4,7 @@ ini_set('max_execution_time', 100000);
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require("config.php");
-require("Helpers/CurlHelper.php");
-require("Helpers/EmailHelper.php");
-require("Helpers/phpmailer/PHPMailer.php");
-require('Helpers/Simple_html_dom.php');
-require('Helpers/LoggedExceptionHelper.php');
-require('Database/MySqlPDO.php');
-require('Helpers/SelectSqlHelper.php');
-
-$_GET['filter'] = utf8_decode($_GET['filter']);
+require_once("ajaxIncludes.php");
 
 $innerJoin = "";
 
@@ -42,8 +33,8 @@ if (count($sql) > 0) {
             <?php
             foreach ($sql as $ind => $val) {
                 ?>
-                <a href="#" class="list-group-item" onclick="updateCodProd('<?php echo listaProdPorSca($val['sca_id'], $db) ?>')">
-                    <h4 class="list-group-item-heading"><?php echo utf8_encode($val['name']) ?>
+                <a href="#" class="list-group-item" onclick="updateCodProd('<?php echo listaProdPorSca($val['code'], $db) ?>')">
+                    <h4 class="list-group-item-heading"><?php echo utf8_decode($val['name']) ?>
                         (<?php echo $val['code'] ?>)</h4>
                 </a>
                 <?php
@@ -70,6 +61,7 @@ function listaProdPorSca($sca_id, $db)
     $select->fields = "pro.code";
     $select->innerjoin = $innerJoin;
     $select->where = $where;
+    $select->orderby = 'pro.code asc';
 
     $result = $db->read($select, 'hnd_produto', 'pro', array(), null);
 

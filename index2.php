@@ -32,13 +32,13 @@ require("config.php");
                 <div class="form-group">
                     <label for="cod_produtos">Codigos dos Produtos</label>
                     <textarea class="form-control" id="cod_produtos" placeholder="Ex: 002361,002362"
-                              value="002362,000273,016003,016070,016087,045001,045014,045011" rows="5"></textarea>
+                              value="002362,000273,016003,016070,016087,045001,045014,045011" rows="8"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="cod_franquias">Codigo Franquias</label>
                     <textarea class="form-control" id="cod_franquias" placeholder="Ex: 10360072,10650784"
                               value="10360072,10650784,10153011,10615393,10438342,10930066,10488217,10774033,10843260,10790939"
-                              rows="5"></textarea>
+                              rows="8"></textarea>
                 </div>
                 <button type="submit" class="btn btn-default" onclick="startProcesso()">Submit</button>
             </form>
