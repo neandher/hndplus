@@ -6,6 +6,8 @@ error_reporting(E_ALL);
 
 require_once("ajaxIncludes.php");
 
+$_GET['filter'] = utf8_decode($_GET['filter']);
+
 /*$innerJoin = " left join hnd_subcategoria as sca on sca.code = pro.sca_id  ";
 $innerJoin .= " left join hnd_categoria as cat on cat.code = sca.cat_id  ";*/
 $innerJoin = "";

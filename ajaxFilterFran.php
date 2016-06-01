@@ -6,6 +6,8 @@ error_reporting(E_ALL);
 
 require_once("ajaxIncludes.php");
 
+$_GET['filter'] = utf8_decode($_GET['filter']);
+
 $innerJoin = " inner join uf as uf on uf.sigla = fra.state ";
 
 $where = " fra.description like '%" . $_GET['filter'] . "%' or fra.district like '%" . $_GET['filter'] . "%' ";
@@ -35,11 +37,9 @@ if (count($sql) > 0) {
             foreach ($sql as $ind => $val) {
                 ?>
                 <a href="#" class="list-group-item" onclick="updateCodFran('<?php echo $val['code'] ?>')">
-                    <h4 class="list-group-item-heading"><?php echo utf8_decode($val['description']) ?></h4>
+                    <h4 class="list-group-item-heading"><?php echo $val['description'] ?></h4>
                     <p class="list-group-item-text">
-                        <?php echo utf8_decode($val['district']) . ' / ' . utf8_decode(
-                                $val['city']
-                            ) . ' / ' . utf8_decode($val['state']) ?>
+                        <?php echo $val['district'] . ' / ' . $val['city'] . ' / ' . $val['state'] ?>
                     </p>
                 </a>
                 <?php

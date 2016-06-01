@@ -6,6 +6,8 @@ error_reporting(E_ALL);
 
 require_once("ajaxIncludes.php");
 
+$_GET['filter'] = utf8_decode($_GET['filter']);
+
 $innerJoin = "";
 
 $where = " sca.name like '%" . $_GET['filter'] . "%' ";
@@ -34,7 +36,7 @@ if (count($sql) > 0) {
             foreach ($sql as $ind => $val) {
                 ?>
                 <a href="#" class="list-group-item" onclick="updateCodProd('<?php echo listaProdPorSca($val['code'], $db) ?>')">
-                    <h4 class="list-group-item-heading"><?php echo utf8_decode($val['name']) ?>
+                    <h4 class="list-group-item-heading"><?php echo $val['name'] ?>
                         (<?php echo $val['code'] ?>)</h4>
                 </a>
                 <?php

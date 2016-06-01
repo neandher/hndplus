@@ -192,7 +192,7 @@ function getCdh($cod, MySqlPDO $db)
     $sql = $db->read($select, 'hnd_franquia', 'fra', array(), null);
 
     if (count($sql) > 0) {
-        return utf8_decode($sql[0]['description'] . ' - ' . $sql[0]['district'] . ' - ' . $sql[0]['state']);
+        return $sql[0]['description'] . ' - ' . $sql[0]['district'] . ' - ' . $sql[0]['state'];
     }
 
     return '';
@@ -207,7 +207,7 @@ function getProd($cod, MySqlPDO $db)
     $sql = $db->read($select, 'hnd_produto', 'pro', array(), null);
 
     if (count($sql) > 0) {
-        return $sql[0]['code'] . ' - ' . utf8_decode(strip_tags($sql[0]['name']));
+        return $sql[0]['code'] . ' - ' . strip_tags($sql[0]['name']);
     }
 
     return '';
