@@ -5,7 +5,8 @@
  *
  * @author Neandher
  */
-class MySqlPDO {
+class MySqlPDO
+{
 
     private $_db;
     static $_dbinfo;
@@ -18,12 +19,18 @@ class MySqlPDO {
         self::$_dbinfo['pass'] = DB_PASS_MYSQL;
         self::$_dbinfo['name'] = DB_NAME_MYSQL;
 
-        try
-        {
-            $this->_db = new PDO('mysql:host=' . self::$_dbinfo['host'] . ';dbname=' . self::$_dbinfo['name'], self::$_dbinfo['user'], self::$_dbinfo['pass']);
-            $this->_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e)
-        {
+        try {
+            $this->_db = new PDO(
+                'mysql:host=' . self::$_dbinfo['host'] . ';dbname=' . self::$_dbinfo['name'],
+                self::$_dbinfo['user'],
+                self::$_dbinfo['pass'],
+                array(
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+                )
+            );
+
+        } catch (PDOException $e) {
             die($e->getMessage());
         }
     }
@@ -31,15 +38,13 @@ class MySqlPDO {
     public function prepareExecute($con, $valores)
     {
 
-        try
-        {
+        try {
 
             $q = $this->_db->prepare($con);
 
             return $q->execute($valores);
 
-        } catch (PDOException $e)
-        {
+        } catch (PDOException $e) {
             //$log = new LoggedExceptionHelper($e);
             die($e->getMessage());
         }
@@ -57,13 +62,13 @@ class MySqlPDO {
         $innerJoin = ($select->innerjoin != null ? "{$select->innerjoin}" : "");
         $distinct = ($select->distinct != null ? "{$select->distinct}" : "");
         $alternativeSql = ($select->alternativeSql != null ? "{$select->alternativeSql}" : "");
-        $paginator = (count($select->paginator) > 0 ? "LIMIT {$select->paginator['pi']} , {$select->paginator['maxRegistriesPerPage']}" : "");
+        $paginator = (count(
+            $select->paginator
+        ) > 0 ? "LIMIT {$select->paginator['pi']} , {$select->paginator['maxRegistriesPerPage']}" : "");
 
-        if ($alternativeSql != null)
-        {
+        if ($alternativeSql != null) {
             $con = $alternativeSql;
-        } else
-        {
+        } else {
 
             $con = " SELECT {$distinct} {$fields} FROM {$tabela} {$nickname} {$innerJoin} {$where} {$orderby} {$paginator} {$limit} {$offset}  ";
 
@@ -73,49 +78,43 @@ class MySqlPDO {
         //var_dump($select->orderby);
         //exit;
 
-        try
-        {
+        try {
 
             $q = $this->_db->prepare($con);
 
-            if (is_null($opt))
-            {
+            if (is_null($opt)) {
 
                 $q->execute($valores);
 
-            } else if ($opt == 'bind')
-            {
+            } else {
+                if ($opt == 'bind') {
 
-                //ex: $dados = array(":bind"=>array($bindvalue=>"str"));
+                    //ex: $dados = array(":bind"=>array($bindvalue=>"str"));
 
-                foreach ($valores as $key => $value)
-                {
+                    foreach ($valores as $key => $value) {
 
-                    foreach ($value as $ind => $value2)
-                    {
+                        foreach ($value as $ind => $value2) {
 
-                        if ($value2 == "int")
-                        {
+                            if ($value2 == "int") {
 
-                            $q->bindValue($key, $ind, PDO::PARAM_INT);
-                        }
+                                $q->bindValue($key, $ind, PDO::PARAM_INT);
+                            }
 
-                        if ($value2 == "str")
-                        {
+                            if ($value2 == "str") {
 
-                            $q->bindValue($key, $ind, PDO::PARAM_STR);
+                                $q->bindValue($key, $ind, PDO::PARAM_STR);
+                            }
                         }
                     }
+
+                    $q->execute();
+
                 }
-
-                $q->execute();
-
             }
 
             return $q->fetchAll(PDO::FETCH_ASSOC);
 
-        } catch (PDOException $e)
-        {
+        } catch (PDOException $e) {
             $log = new LoggedExceptionHelper($e);
         }
     }
