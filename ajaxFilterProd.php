@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 require_once("ajaxIncludes.php");
 
-$_GET['filter'] = utf8_decode($_GET['filter']);
+$_GET['filter'] = utf8_decode($_GET['filter_prod']);
 
 /*$innerJoin = " left join hnd_subcategoria as sca on sca.code = pro.sca_id  ";
 $innerJoin .= " left join hnd_categoria as cat on cat.code = sca.cat_id  ";*/
@@ -44,7 +44,7 @@ if (count($sql) > 0) {
                     <h4 class="list-group-item-heading"><?php echo $val['name'] ?>
                         (<?php echo $val['code'] ?>)</h4>
                     <p class="list-group-item-text">
-                        <?php echo utf8_decode($val['description']) ?>
+                        <?php echo $val['description'] ?>
                     </p>
                 </a>
                 <?php

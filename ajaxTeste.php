@@ -35,24 +35,37 @@ $url = 'https://vo.hinode.com.br/vo-2/rede_login1.asp';
 
 $post = array(
     'login_tipo_id' => 'idconsultor',
-    'rede_usuario'  => HND_USER,
-    'rede_senha'    => HND_PASS,
-    'txtValor'      => $captchaDecode,
-    'entrar'        => 'Entrar'
+    'rede_usuario' => HND_USER,
+    'rede_senha' => HND_PASS,
+    'txtValor' => $captchaDecode,
+    'entrar' => 'Entrar'
 );
 
 $post_fields = http_build_query($post, null, '&');
 
 $result = CurlHelper::curlPost($url, $post_fields, $cookieFile);
 
-if (strstr($result['exec'], '<a HREF="vo-inicio.asp">here</a>')) {
+$html = new Simple_html_dom($result['exec']);
+
+$find_login = $html->find('a');
+
+if (!is_array($find_login)) {
+    echo 'Houve um erro ao acessar o sistema da hinode. Erro 4';
+    exit;
+}
+
+if ($find_login[0]->attr['href'] == 'rede_login.asp') {
+    echo 'Login ou senha invalidos!';
+    exit;
+}
+
+if ($find_login[0]->attr['href'] == 'index.asp') {
 
     $url = 'https://vo.hinode.com.br/vo-2/vo3-gera-pedido.asp';
 
     $result = CurlHelper::curl($url, false, false, $cookieFile);
 
     $html = new Simple_html_dom($result['exec']);
-
 
     $ss_pg = $html->find('input[id=ss_pg]')[0]->attr['value'];
 
@@ -76,7 +89,7 @@ if (strstr($result['exec'], '<a HREF="vo-inicio.asp">here</a>')) {
 
     // Lista produtos de uma subcategoria
     $post = array(
-        'acao'  => 'lista_prod_subcat',
+        'acao' => 'lista_prod_subcat',
         'idcat' => '27',
     );
 
@@ -106,7 +119,7 @@ function todosProdutos($cookieFile)
     $db = new MySqlPDO();
 
     $post = array(
-        'acao'  => 'lista_cat_subcat',
+        'acao' => 'lista_cat_subcat',
         'idcat' => '0',
     );
 
@@ -119,19 +132,20 @@ function todosProdutos($cookieFile)
     $select = new SelectSqlHelper();
 
     $checkSub = array();
+    $checkPro = array();
 
     foreach ($categorias as $cat) {
 
         if (!empty($cat['Uso'])) {
 
             $insertCat['code'] = $cat['idUso'];
-            $insertCat['name'] = utf8_decode($cat['Uso']);
+            $insertCat['name'] = $cat['Uso'];
             $insertCat['sequence'] = $cat['ordem'];
 
             //insert($insertCat, $db, 'hnd_categoria');
 
             $postSubCat = array(
-                'acao'  => 'lista_cat_subcat',
+                'acao' => 'lista_cat_subcat',
                 'idcat' => $cat['idUso'],
             );
 
@@ -147,31 +161,30 @@ function todosProdutos($cookieFile)
 
                     if (!empty($sub['Linha'])) {
 
-                        if(!in_array($sub['Linha'], $checkSub)){
+                        if (!in_array($sub['Linha'], $checkSub)) {
 
                             $checkSub[] = $sub['Linha'];
 
                             $insertSub['code'] = $sub['idLinha'];
-                            $insertSub['name'] = utf8_decode($sub['Linha']);
-                            //$insertSub['cat_id'] = $cat['idUso'];
+                            $insertSub['name'] = $sub['Linha'];
 
-                            insert($insertSub, $db, 'hnd_subcategoria');
+                            //insert($insertSub, $db, 'hnd_subcategoria');
                         }
 
                         $insertSubCat['sca_id'] = $sub['idLinha'];
                         $insertSubCat['cat_id'] = $cat['idUso'];
 
-                        insert($insertSubCat, $db, 'hnd_sca_cat');
+                        //insert($insertSubCat, $db, 'hnd_sca_cat');
 
                         $postProd = array(
-                            'acao'  => 'lista_prod_subcat',
+                            'acao' => 'lista_prod_subcat',
                             'idcat' => $sub['idLinha'],
                         );
 
-                        //$result = executaAcaoProdutos($postProd, $cookieFile, true);
+                        $result = executaAcaoProdutos($postProd, $cookieFile, true);
 
-                        //$produtos = json_decode($result['exec'], true);
-                        $produtos = array();
+                        $produtos = json_decode($result['exec'], true);
+                        //$produtos = array();
 
                         foreach ($produtos as $pro) {
 
@@ -179,18 +192,16 @@ function todosProdutos($cookieFile)
 
                                 if (!empty($pro['Nome'])) {
 
-                                    $select->fields = "code";
-                                    $select->where = "code = '{$pro['Codigo']}' ";
-                                    $check = $db->read($select, 'hnd_produto', 'pro', array(), null);
+                                    if (!in_array($pro['Codigo'], $checkPro)) {
 
-                                    if (!count($check) > 0) {
+                                        $checkPro[] = $pro['Codigo'];
 
                                         $insert['code'] = $pro['Codigo'];
-                                        $insert['name'] = utf8_decode($pro['Nome']);
-                                        $insert['description'] = utf8_decode($pro['Descricao']);
+                                        $insert['name'] = $pro['Nome'];
+                                        $insert['description'] = $pro['Descricao'];
                                         $insert['sca_id'] = $sub['idLinha'];
 
-                                        insert($insert, $db, 'hnd_produto');
+                                        //insert($insert, $db, 'hnd_produto');
                                     }
                                 }
                             }
@@ -209,7 +220,7 @@ function todosProdutos($cookieFile)
 function todasFranquias($cookieFile)
 {
     $post = array(
-        'acao'   => 'obter_cdh',
+        'acao' => 'obter_cdh',
         'estado' => '',
     );
 

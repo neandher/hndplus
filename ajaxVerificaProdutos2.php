@@ -39,7 +39,21 @@ if (count($captcha) > 0) {
 
     $result = CurlHelper::curlPost($url, $post_fields, $cookieFile);
 
-    if (strstr($result['exec'], '<a HREF="vo-inicio.asp">here</a>')) {
+    $html = new Simple_html_dom($result['exec']);
+
+    $find_login = $html->find('a');
+
+    if (!is_array($find_login)) {
+        echo 'Houve um erro ao acessar o sistema da hinode. Erro 4';
+        exit;
+    }
+
+    if ($find_login[0]->attr['href'] == 'rede_login.asp') {
+        echo 'Login ou senha invalidos!';
+        exit;
+    }
+
+    if ($find_login[0]->attr['href'] == 'index.asp') {
 
         $url = 'https://vo.hinode.com.br/vo-2/vo3-gera-pedido.asp';
 
@@ -49,7 +63,7 @@ if (count($captcha) > 0) {
 
         $find_ss_pg = $html->find('input[id=ss_pg]');
 
-        if(is_null($find_ss_pg)){
+        if (is_null($find_ss_pg)) {
             echo 'Houve um erro ao acessar o sistema da hinode. Erro 3';
             exit;
         }
@@ -103,7 +117,8 @@ if (count($captcha) > 0) {
                         if ($result['exec'] == '') {
 
                             $data_cdh[$val_cdh][] = $val_prod;
-                            var_dump($result['exec']);
+
+                            //var_dump($result['exec']);
                         }
                     }
 
@@ -148,8 +163,7 @@ if (count($captcha) > 0) {
     } else {
         echo 'Houve um erro ao acessar o sistema da hinode. Erro 2';
     }
-}
-else{
+} else {
     echo 'Houve um erro ao acessar o sistema da hinode. Erro 1';
 }
 

@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 require_once("ajaxIncludes.php");
 
-$_GET['filter'] = utf8_decode($_GET['filter']);
+$_GET['filter'] = utf8_decode($_GET['filter_fran']);
 
 $innerJoin = " inner join uf as uf on uf.sigla = fra.state ";
 

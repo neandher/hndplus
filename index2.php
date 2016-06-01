@@ -61,46 +61,51 @@ require("config.php");
                 </li>
             </ul>
 
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="tab_produtos">
+            <form id="formFilter">
 
-                    <br>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="tab_produtos">
 
-                    <div class="form-group">
-                        <label for="filter_prod">Digite o código ou o nome dos produtos que desejar pesquisar</label>
-                        <input type="text" class="form-control" name="filter_prod" id="filter_prod">
+                        <br>
+
+                        <div class="form-group">
+                            <label for="filter_prod">Digite o código ou o nome dos produtos que desejar
+                                pesquisar</label>
+                            <input type="text" class="form-control" name="filter_prod" id="filter_prod">
+                        </div>
+
+                        <div id="filter_prod_results"></div>
+
                     </div>
 
-                    <div id="filter_prod_results"></div>
+                    <div role="tabpanel" class="tab-pane" id="tab_linha_produtos">
 
-                </div>
+                        <br>
 
-                <div role="tabpanel" class="tab-pane" id="tab_linha_produtos">
+                        <div class="form-group">
+                            <label for="filter_linha_prod">Digite a linha de produtos que desejar pesquisar</label>
+                            <input type="text" class="form-control" name="filter_linha_prod" id="filter_linha_prod">
+                        </div>
 
-                    <br>
+                        <div id="filter_linha_prod_results"></div>
 
-                    <div class="form-group">
-                        <label for="filter_linha_prod">Digite a linha de produtos que desejar pesquisar</label>
-                        <input type="text" class="form-control" name="filter_linha_prod" id="filter_linha_prod">
                     </div>
 
-                    <div id="filter_linha_prod_results"></div>
+                    <div role="tabpanel" class="tab-pane" id="tab_franquias">
 
-                </div>
+                        <br>
 
-                <div role="tabpanel" class="tab-pane" id="tab_franquias">
+                        <div class="form-group">
+                            <label for="filter_fran">Digite o nome das franquias que desejar pesquisar</label>
+                            <input type="text" class="form-control" name="filter_fran" id="filter_fran">
+                        </div>
 
-                    <br>
+                        <div id="filter_fran_results"></div>
 
-                    <div class="form-group">
-                        <label for="filter_fran">Digite o nome das franquias que desejar pesquisar</label>
-                        <input type="text" class="form-control" name="filter_fran" id="filter_fran">
                     </div>
-
-                    <div id="filter_fran_results"></div>
-
                 </div>
-            </div>
+
+            </form>
 
             <!--<table class="table table-striped table-bordered">
                 <thead>
@@ -234,13 +239,14 @@ require("config.php");
                 event.preventDefault();
             }
 
-            if ($(this).val().length >= 3) {
+            if ($(this).val().length >= 2) {
 
                 $('#filter_prod_results').html('carregando...');
 
                 $.ajax({
                         type: "GET",
-                        url: "<?php echo BASE_URL ?>ajaxFilterProd.php?filter=" + $("#filter_prod").val()
+                        data: $('#formFilter').serialize(),
+                        url: "<?php echo BASE_URL ?>ajaxFilterProd.php"
                     })
                     .done(function (data) {
 
@@ -259,13 +265,14 @@ require("config.php");
                 event.preventDefault();
             }
 
-            if ($(this).val().length >= 3) {
+            if ($(this).val().length >= 2) {
 
                 $('#filter_linha_prod_results').html('carregando...');
 
                 $.ajax({
                         type: "GET",
-                        url: "<?php echo BASE_URL ?>ajaxFilterLinhaProd.php?filter=" + $("#filter_linha_prod").val()
+                        data: $('#formFilter').serialize(),
+                        url: "<?php echo BASE_URL ?>ajaxFilterLinhaProd.php"
                     })
                     .done(function (data) {
 
@@ -284,13 +291,14 @@ require("config.php");
                 event.preventDefault();
             }
 
-            if ($(this).val().length >= 3) {
+            if ($(this).val().length >= 2) {
 
                 $('#filter_fran_results').html('carregando...');
 
                 $.ajax({
                         type: "GET",
-                        url: "<?php echo BASE_URL ?>ajaxFilterFran.php?filter=" + $("#filter_fran").val()
+                        data: $('#formFilter').serialize(),
+                        url: "<?php echo BASE_URL ?>ajaxFilterFran.php"
                     })
                     .done(function (data) {
 
