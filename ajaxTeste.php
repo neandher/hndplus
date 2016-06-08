@@ -5,14 +5,7 @@ ini_set('max_execution_time', 100000);
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require("config.php");
-require("Helpers/CurlHelper.php");
-require("Helpers/EmailHelper.php");
-require("Helpers/phpmailer/PHPMailer.php");
-require('Helpers/Simple_html_dom.php');
-require('Helpers/LoggedExceptionHelper.php');
-require('Helpers/SelectSqlHelper.php');
-require('Database/MySqlPDO.php');
+require_once('ajaxIncludes.php');
 
 $cookieFile = TEMP_PATH . session_id() . '.txt';
 
@@ -35,10 +28,10 @@ $url = 'https://vo.hinode.com.br/vo-2/rede_login1.asp';
 
 $post = array(
     'login_tipo_id' => 'idconsultor',
-    'rede_usuario' => HND_USER,
-    'rede_senha' => HND_PASS,
-    'txtValor' => $captchaDecode,
-    'entrar' => 'Entrar'
+    'rede_usuario'  => HND_USER,
+    'rede_senha'    => HND_PASS,
+    'txtValor'      => $captchaDecode,
+    'entrar'        => 'Entrar'
 );
 
 $post_fields = http_build_query($post, null, '&');
@@ -89,7 +82,7 @@ if ($find_login[0]->attr['href'] == 'index.asp') {
 
     // Lista produtos de uma subcategoria
     $post = array(
-        'acao' => 'lista_prod_subcat',
+        'acao'  => 'lista_prod_subcat',
         'idcat' => '27',
     );
 
@@ -119,7 +112,7 @@ function todosProdutos($cookieFile)
     $db = new MySqlPDO();
 
     $post = array(
-        'acao' => 'lista_cat_subcat',
+        'acao'  => 'lista_cat_subcat',
         'idcat' => '0',
     );
 
@@ -145,7 +138,7 @@ function todosProdutos($cookieFile)
             //insert($insertCat, $db, 'hnd_categoria');
 
             $postSubCat = array(
-                'acao' => 'lista_cat_subcat',
+                'acao'  => 'lista_cat_subcat',
                 'idcat' => $cat['idUso'],
             );
 
@@ -177,7 +170,7 @@ function todosProdutos($cookieFile)
                         //insert($insertSubCat, $db, 'hnd_sca_cat');
 
                         $postProd = array(
-                            'acao' => 'lista_prod_subcat',
+                            'acao'  => 'lista_prod_subcat',
                             'idcat' => $sub['idLinha'],
                         );
 
@@ -201,7 +194,7 @@ function todosProdutos($cookieFile)
                                         $insert['description'] = $pro['Descricao'];
                                         $insert['sca_id'] = $sub['idLinha'];
 
-                                        //insert($insert, $db, 'hnd_produto');
+                                        insert($insert, $db, 'hnd_produto');
                                     }
                                 }
                             }
@@ -220,7 +213,7 @@ function todosProdutos($cookieFile)
 function todasFranquias($cookieFile)
 {
     $post = array(
-        'acao' => 'obter_cdh',
+        'acao'   => 'obter_cdh',
         'estado' => '',
     );
 

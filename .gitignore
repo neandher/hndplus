@@ -1,3 +1,5 @@
 .idea/*
 Temp/*
 config.php
+header.php
+Database/MySqlPDO.php
