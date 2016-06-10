@@ -13,6 +13,7 @@ $innerJoin .= " left join hnd_categoria as cat on cat.code = sca.cat_id  ";*/
 $innerJoin = "";
 
 $where = " pro.name like '%" . $_GET['filter'] . "%' or pro.code like '%" . $_GET['filter'] . "%' ";
+$where .= " or pro.description like '%" . $_GET['filter'] . "%' ";
 //$where .= " or sca.name like '%" . $_GET['filter'] . "%' or cat.name like '%" . $_GET['filter'] . "%' ";
 //$where .= " or sca.name like '%" . $_GET['filter'] . "%' ";
 
@@ -21,7 +22,7 @@ $select->fields = "pro.name,pro.code,pro.description";
 $select->innerjoin = $innerJoin;
 $select->where = $where;
 $select->orderby = "pro.name asc";
-$select->limit = 10;
+$select->limit = 20;
 
 $db = new MySqlPDO();
 $sql = $db->read($select, 'hnd_produto', 'pro', array(), null);

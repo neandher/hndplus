@@ -17,7 +17,7 @@ $select->fields = "sca.sca_id,sca.name,sca.code";
 $select->innerjoin = $innerJoin;
 $select->where = $where;
 $select->orderby = "sca.name asc";
-$select->limit = 10;
+$select->limit = 20;
 
 $db = new MySqlPDO();
 $sql = $db->read($select, 'hnd_subcategoria', 'sca', array(), null);

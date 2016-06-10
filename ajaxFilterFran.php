@@ -18,7 +18,7 @@ $select->fields = "fra.description,fra.district,fra.city,fra.code,fra.state,uf.d
 $select->innerjoin = $innerJoin;
 $select->where = $where;
 $select->orderby = "fra.description asc";
-$select->limit = 10;
+$select->limit = 20;
 
 $db = new MySqlPDO();
 $sql = $db->read($select, 'hnd_franquia', 'fra', array(), null);
