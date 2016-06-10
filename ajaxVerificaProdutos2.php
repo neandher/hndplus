@@ -29,10 +29,10 @@ if (count($captcha) > 0) {
 
     $post = array(
         'login_tipo_id' => 'idconsultor',
-        'rede_usuario'  => HND_USER,
-        'rede_senha'    => HND_PASS,
-        'txtValor'      => $captchaDecode,
-        'entrar'        => 'Entrar'
+        'rede_usuario' => HND_USER,
+        'rede_senha' => HND_PASS,
+        'txtValor' => $captchaDecode,
+        'entrar' => 'Entrar'
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -63,7 +63,7 @@ if (count($captcha) > 0) {
 
         $find_ss_pg = $html->find('input[id=ss_pg]');
 
-        if (is_null($find_ss_pg)) {
+        if (!count($find_ss_pg) > 0) {
             echo 'Houve um erro ao acessar o sistema da hinode. Erro 3';
             exit;
         }
@@ -96,19 +96,19 @@ if (count($captcha) > 0) {
                     foreach ($searchProdutos as $val_prod) {
 
                         $post = array(
-                            'acao'             => 'car_add_item',
-                            'idconsultor'      => $idconsultor,
-                            'id_cdhret'        => $val_cdh,
-                            'loc_prod'         => $val_prod,
-                            'qtd_prod'         => '1',
-                            'ss_pg'            => $ss_pg,
-                            'regra_estoque'    => '0',
-                            'atv_cons'         => '0',
-                            'atv_cad_cons'     => '1',
-                            'vl_sub_ped'       => '0.00',
+                            'acao' => 'car_add_item',
+                            'idconsultor' => $idconsultor,
+                            'id_cdhret' => $val_cdh,
+                            'loc_prod' => $val_prod,
+                            'qtd_prod' => '1',
+                            'ss_pg' => $ss_pg,
+                            'regra_estoque' => '0',
+                            'atv_cons' => '0',
+                            'atv_cad_cons' => '1',
+                            'vl_sub_ped' => '0.00',
                             'valor_minimo_kit' => '0.00',
                             'ponto_minimo_kit' => '0.00',
-                            'atv_cons_bkp'     => '0',
+                            'atv_cons_bkp' => '0',
                             'atv_cad_cons_bkp' => '1',
                         );
 
@@ -127,12 +127,12 @@ if (count($captcha) > 0) {
                              */
 
                             $post = array(
-                                'acao'             => 'car_del_item',
-                                'idconsultor'      => $idconsultor,
-                                'loc_prod'         => $val_prod,
-                                'qtd_prod'         => '1',
-                                'ss_pg'            => $ss_pg,
-                                'atv_cad_cons'     => '1',
+                                'acao' => 'car_del_item',
+                                'idconsultor' => $idconsultor,
+                                'loc_prod' => $val_prod,
+                                'qtd_prod' => '1',
+                                'ss_pg' => $ss_pg,
+                                'atv_cad_cons' => '1',
                                 'atv_cad_cons_bkp' => '1',
                             );
 
@@ -174,7 +174,10 @@ if (count($captcha) > 0) {
                     $sql_prod = getProd($prod, $db);
 
                     $str .= '<tr>
-                                <th scope="row"><img src="https://online.hinode.com.br/produtos/' . $sql_prod['code'] . '_p.jpg" alt="' . $sql_prod['name'] . '"></th>
+                                <th scope="row">
+                                <img src="https://online.hinode.com.br/produtos/' . $sql_prod['code'] . '_p.jpg" alt="' . $sql_prod['name'] . '"
+                                onerror="this.src=\'web-files/default.jpg\'">
+                                </th>
                                 <td>' . $sql_prod['code'] . '</td>
                                 <td>' . $sql_prod['name'] . '</td>
                                 <td>' . $sql_prod['description'] . '</td>

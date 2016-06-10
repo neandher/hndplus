@@ -44,10 +44,8 @@ if (count($sql) > 0) {
 
                 <tr style="cursor: pointer" onclick="updateCodProd('<?php echo $val['code'] ?>')">
                     <th scope="row">
-                        
-                            <img src="https://online.hinode.com.br/produtos/<?php echo $val['code'] ?>_p.jpg"
-                                 onerror="this.src='web-files/default.jpg'"/>
-
+                        <img src="https://online.hinode.com.br/produtos/<?php echo $val['code'] ?>_p.jpg"
+                             onerror="this.src='web-files/default.jpg'"/>
                     </th>
                     <td><?php echo '<strong>' . $val['code'] . ' - ' . $val['name'] . '</strong> <br>' . $val['description'] ?></td>
                 </tr>
