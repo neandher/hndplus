@@ -34,23 +34,28 @@ if (count($sql) > 0) {
         <!-- Default panel contents -->
         <div class="panel-heading">Clique sobre o produto para adicion&aacute;-lo a lista de pesquisa</div>
 
-        <div class="list-group" >
+        <table class="table table-hover">
+            <tbody>
 
             <?php
             foreach ($sql as $ind => $val) {
                 ?>
-                <a href="#" class="list-group-item"  _style="float: left; width: 100%;" onclick="updateCodProd('<?php echo $val['code'] ?>')" >
-                    <!--<p class="img"><img src="https://online.hinode.com.br/produtos/<?php /*echo $val['code'] */?>_p.jpg" class="pull-left"></p>-->
-                    <h4 class="list-group-item-heading"><?php echo $val['name'] ?>
-                        (<?php echo $val['code'] ?>)</h4>
-                    <p class="list-group-item-text">
-                        <?php echo $val['description'] ?>
-                    </p>
-                </a>
+
+                <tr style="cursor: pointer" onclick="updateCodProd('<?php echo $val['code'] ?>')">
+                    <th scope="row">
+                        
+                            <img src="https://online.hinode.com.br/produtos/<?php echo $val['code'] ?>_p.jpg"
+                                 onerror="this.src='web-files/default.jpg'"/>
+
+                    </th>
+                    <td><?php echo '<strong>' . $val['code'] . ' - ' . $val['name'] . '</strong> <br>' . $val['description'] ?></td>
+                </tr>
+
                 <?php
             }
             ?>
-        </div>
+            </tbody>
+        </table>
     </div>
 
     <?php

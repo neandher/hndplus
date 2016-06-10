@@ -162,7 +162,7 @@ if (count($captcha) > 0) {
 
                 $str .= '<table class="table table-hover">
                         <tr>
-                            <th>Imagem</th>
+                            <th style="max-width: 20%">Imagem</th>
                             <th>Codigo</th>
                             <th>Nome</th>
                             <th style="width: 45%;">Descricao</th>

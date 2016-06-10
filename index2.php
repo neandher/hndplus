@@ -3,7 +3,6 @@
 require("config.php");
 
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -185,15 +184,17 @@ require("config.php");
 
         startDate = new Date();
 
-        var result_loading = `<ul class="list-group" id="result_loading">
-            <li id="lgi" class="list-group-item">
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100"
-                         aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span
-                            class="sr-only">100% Complete</span></div>
-                </div>
-            </li>
-        </ul>`;
+        var result_loading = '';
+
+        result_loading += '<ul class="list-group" id="result_loading">';
+        result_loading += '<li id="lgi" class="list-group-item">';
+        result_loading += '<div class="progress">';
+        result_loading += '<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100"';
+        result_loading += 'aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span';
+        result_loading += 'class="sr-only">100% Complete</span></div>';
+        result_loading += '</div>';
+        result_loading += '</li>';
+        result_loading += '</ul>';
 
         $('#result').html(result_loading);
 
