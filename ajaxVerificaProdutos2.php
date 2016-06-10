@@ -29,10 +29,10 @@ if (count($captcha) > 0) {
 
     $post = array(
         'login_tipo_id' => 'idconsultor',
-        'rede_usuario' => HND_USER,
-        'rede_senha' => HND_PASS,
-        'txtValor' => $captchaDecode,
-        'entrar' => 'Entrar'
+        'rede_usuario'  => HND_USER,
+        'rede_senha'    => HND_PASS,
+        'txtValor'      => $captchaDecode,
+        'entrar'        => 'Entrar'
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -96,19 +96,19 @@ if (count($captcha) > 0) {
                     foreach ($searchProdutos as $val_prod) {
 
                         $post = array(
-                            'acao' => 'car_add_item',
-                            'idconsultor' => $idconsultor,
-                            'id_cdhret' => $val_cdh,
-                            'loc_prod' => $val_prod,
-                            'qtd_prod' => '1',
-                            'ss_pg' => $ss_pg,
-                            'regra_estoque' => '0',
-                            'atv_cons' => '0',
-                            'atv_cad_cons' => '1',
-                            'vl_sub_ped' => '0.00',
+                            'acao'             => 'car_add_item',
+                            'idconsultor'      => $idconsultor,
+                            'id_cdhret'        => $val_cdh,
+                            'loc_prod'         => $val_prod,
+                            'qtd_prod'         => '1',
+                            'ss_pg'            => $ss_pg,
+                            'regra_estoque'    => '0',
+                            'atv_cons'         => '0',
+                            'atv_cad_cons'     => '1',
+                            'vl_sub_ped'       => '0.00',
                             'valor_minimo_kit' => '0.00',
                             'ponto_minimo_kit' => '0.00',
-                            'atv_cons_bkp' => '0',
+                            'atv_cons_bkp'     => '0',
                             'atv_cad_cons_bkp' => '1',
                         );
 
@@ -117,6 +117,26 @@ if (count($captcha) > 0) {
                         if ($result['exec'] == '') {
 
                             $data_cdh[$val_cdh][] = $val_prod;
+
+                            //var_dump($result['exec']);
+
+                            /**
+                             *
+                             * type: 'POST',
+                             * data: { acao: 'car_del_item', idconsultor: vid_cons, loc_prod: vloc_prod, ss_pg: vss_pg, atv_cad_cons: vatv_cad_cons_bkp, qtd_prod: vqtd },
+                             */
+
+                            $post = array(
+                                'acao'             => 'car_del_item',
+                                'idconsultor'      => $idconsultor,
+                                'loc_prod'         => $val_prod,
+                                'qtd_prod'         => '1',
+                                'ss_pg'            => $ss_pg,
+                                'atv_cad_cons'     => '1',
+                                'atv_cad_cons_bkp' => '1',
+                            );
+
+                            $result = executaAcaoProdutos($post, $cookieFile, true);
 
                             //var_dump($result['exec']);
                         }
@@ -130,8 +150,6 @@ if (count($captcha) > 0) {
 
             $str = '';
 
-            $str = '<div class="panel panel-default">';
-
             $a_cdh = array();
 
             foreach ($data_cdh as $ind => $val) {
@@ -139,19 +157,33 @@ if (count($captcha) > 0) {
                 if (!in_array($ind, $a_cdh)) {
 
                     $a_cdh[] = $ind;
-                    $str .= '<div class="panel-heading"><strong>' . getCdh($ind, $db) . '</strong></div>';
+                    $str .= '<div class="panel panel-primary"><div class="panel-heading"><strong>' . getCdh($ind, $db) . '</strong></div>';
                 }
 
-                $str .= '<ul class="list-group">';
+                $str .= '<table class="table table-hover">
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Codigo</th>
+                            <th>Nome</th>
+                            <th style="width: 45%;">Descricao</th>
+                        </tr>
+                        <tbody>';
 
                 foreach ($val as $prod) {
-                    $str .= '<li class="list-group-item">' . getProd($prod, $db) . '</li>';
+
+                    $sql_prod = getProd($prod, $db);
+
+                    $str .= '<tr>
+                                <th scope="row"><img src="https://online.hinode.com.br/produtos/' . $sql_prod['code'] . '_p.jpg" alt="' . $sql_prod['name'] . '"></th>
+                                <td>' . $sql_prod['code'] . '</td>
+                                <td>' . $sql_prod['name'] . '</td>
+                                <td>' . $sql_prod['description'] . '</td>
+                            </tr>';
                 }
 
-                $str .= '</ul>';
+                $str .= '</tbody></table>';
+                $str .= '</div>';
             }
-
-            $str .= '</div>';
 
             echo $str;
 
@@ -215,13 +247,14 @@ function getCdh($cod, MySqlPDO $db)
 function getProd($cod, MySqlPDO $db)
 {
     $select = new SelectSqlHelper();
-    $select->fields = "pro.code,pro.name";
+    $select->fields = "pro.code,pro.name,pro.description";
     $select->where = "pro.code = '{$cod}'";
 
     $sql = $db->read($select, 'hnd_produto', 'pro', array(), null);
 
     if (count($sql) > 0) {
-        return $sql[0]['code'] . ' - ' . strip_tags($sql[0]['name']);
+        //return $sql[0]['code'] . ' - ' . strip_tags($sql[0]['name']);
+        return $sql[0];
     }
 
     return '';

@@ -64,8 +64,9 @@ if ($find_login[0]->attr['href'] == 'index.asp') {
 
     $idconsultor = HND_USER;
 
-    todosProdutos($cookieFile);
+    //todosProdutos($cookieFile);
     //todasFranquias($cookieFile);
+    todosPedidos($cookieFile);
     exit;
 
     // lista todas as franquias
@@ -96,6 +97,20 @@ unlink($cookieFile);
 function executaAcaoProdutos($post, $cookieFile, $isPost = false)
 {
     $url = 'https://vo.hinode.com.br/ajax/vo3_ajax_consultor_gera_pedido.asp';
+
+    $post_fields = http_build_query($post, null, '&');
+
+    return $isPost ? CurlHelper::curlPost($url, $post_fields, $cookieFile) : CurlHelper::curl(
+        $url,
+        false,
+        false,
+        $cookieFile
+    );
+}
+
+function executaAcaoPedidos($post, $cookieFile, $isPost = false)
+{
+    $url = 'https://vo.hinode.com.br/ajax/vo3_ajax_consultor_gera_pedido_historico.asp';
 
     $post_fields = http_build_query($post, null, '&');
 
@@ -236,6 +251,20 @@ function todasFranquias($cookieFile)
 
         //insert($insert, $db, 'hnd_franquia');
     }
+}
+
+function todosPedidos($cookieFile)
+{
+    $post = array(
+        'acao'   => 'lista_pedido_consulta',
+        'idconsultor' => HND_USER,
+    );
+
+    $result = executaAcaoPedidos($post, $cookieFile, true);
+
+    $pedidos = json_decode($result['exec'], true);
+
+    var_dump($pedidos);
 }
 
 function insert(Array $dados, $db, $tabela)
