@@ -16,6 +16,8 @@ $html = new Simple_html_dom($result['exec']);
 
 $captcha = $html->find('div[id=divQuadro]');
 
+$efetuar_pedido = true;
+
 if (count($captcha) > 0) {
 
     $letra1 = $captcha[0]->nodes[0]->parent->children[0]->nodes[0]->_[4];
@@ -91,6 +93,8 @@ if (count($captcha) > 0) {
 
                 if (!in_array($val_cdh, $a_cdh)) {
 
+                    $count = 0;
+
                     $a_cdh[] = $val_cdh;
 
                     foreach ($searchProdutos as $val_prod) {
@@ -139,9 +143,24 @@ if (count($captcha) > 0) {
                             $result = executaAcaoProdutos($post, $cookieFile, true);
 
                             //var_dump($result['exec']);
+
+                            $count++;
                         }
                     }
 
+                    //$data_cdh[$val_cdh]['total'] = $count;
+
+                    if($efetuar_pedido  && $count > 0){
+
+                        //$post = array(
+                        //    'acao' => 'validar-carrinho',
+                        //    'ss_pg' => $ss_pg,
+                        //);
+
+                        //$result = executaAcaoProdutos($post, $cookieFile, true);
+
+                        //$retorno = json_decode($result['exec'], true);
+                    }
                 }
             }
         }
