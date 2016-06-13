@@ -122,44 +122,46 @@ if (count($captcha) > 0) {
 
                             $data_cdh[$val_cdh][] = $val_prod;
 
-                            //var_dump($result['exec']);
+                            if (!$efetuar_pedido) {
 
-                            /**
-                             *
-                             * type: 'POST',
-                             * data: { acao: 'car_del_item', idconsultor: vid_cons, loc_prod: vloc_prod, ss_pg: vss_pg, atv_cad_cons: vatv_cad_cons_bkp, qtd_prod: vqtd },
-                             */
+                                $post = array(
+                                    'acao' => 'car_del_item',
+                                    'idconsultor' => $idconsultor,
+                                    'loc_prod' => $val_prod,
+                                    'qtd_prod' => '1',
+                                    'ss_pg' => $ss_pg,
+                                    'atv_cad_cons' => '1',
+                                    'atv_cad_cons_bkp' => '1',
+                                );
 
-                            $post = array(
-                                'acao' => 'car_del_item',
-                                'idconsultor' => $idconsultor,
-                                'loc_prod' => $val_prod,
-                                'qtd_prod' => '1',
-                                'ss_pg' => $ss_pg,
-                                'atv_cad_cons' => '1',
-                                'atv_cad_cons_bkp' => '1',
-                            );
-
-                            $result = executaAcaoProdutos($post, $cookieFile, true);
-
-                            //var_dump($result['exec']);
+                                $result = executaAcaoProdutos($post, $cookieFile, true);
+                            }
 
                             $count++;
                         }
                     }
 
-                    //$data_cdh[$val_cdh]['total'] = $count;
+                    if ($efetuar_pedido && $count > 0) {
 
-                    if($efetuar_pedido  && $count > 0){
+                        $post = array(
+                            'acao' => 'validar-carrinho',
+                            'ss_pg' => $ss_pg,
+                        );
 
-                        //$post = array(
-                        //    'acao' => 'validar-carrinho',
-                        //    'ss_pg' => $ss_pg,
-                        //);
+                        $result = executaAcaoProdutos($post, $cookieFile, true);
 
-                        //$result = executaAcaoProdutos($post, $cookieFile, true);
+                        $retorno = $result['exec'];
 
-                        //$retorno = json_decode($result['exec'], true);
+                        if (strstr($retorno, '|')) {
+
+                            $exp = explode('|', $retorno);
+
+                            if ($exp[0] === '0') {
+                                efetuaPedido($cookieFile, $val_cdh, $ss_pg, $db);
+                            }
+                        }
+
+                        exit;
                     }
                 }
             }
@@ -175,8 +177,12 @@ if (count($captcha) > 0) {
 
                 if (!in_array($ind, $a_cdh)) {
 
+                    $cdh_info = getCdh($ind, $db);
+
                     $a_cdh[] = $ind;
-                    $str .= '<div class="panel panel-primary"><div class="panel-heading"><strong>' . getCdh($ind, $db) . '</strong></div>';
+                    $str .= '<div class="panel panel-primary"><div class="panel-heading">';
+                    $str .= '<strong>' . $cdh_info['description'] . ' - ' . $cdh_info['district'] . ' - ' . $cdh_info['state'] . '</strong>';
+                    $str .= '</div>';
                 }
 
                 $str .= '<table class="table table-hover">
@@ -237,30 +243,15 @@ function executaAcaoProdutos($post, $cookieFile, $isPost = false)
 
 function getCdh($cod, MySqlPDO $db)
 {
-    /*$contentCDH = array(
-        '10360072' => 'Vila Velha - Praia da Costa',
-        '10650784' => 'Vitoria - Praia do Canto',
-        '10153011' => 'Vitoria - Santa Lucia',
-        '10615393' => 'CARIACICA - JARDIM AMERICA',
-        '10438342' => 'SERRA - PQ RESIDENCIAL LARANJEIRAS',
-        '10930066' => 'GUARAPARI',
-
-        '10488217' => 'Cachoeiro de Itapemirim - CENTRO',
-        '10774033' => 'COLATINA - ESPLANADA',
-        '10843260' => 'LINHARES - CENTRO',
-        '10790939' => 'SAO MATEUS - SERNAMBY',
-    );
-
-    return isset($contentCDH[$cod]) ? $contentCDH[$cod] : '';*/
-
     $select = new SelectSqlHelper();
-    $select->fields = "fra.code,fra.description,fra.state,fra.district";
+    $select->fields = "fra.code,fra.description,fra.state,fra.district,fra.email";
     $select->where = "fra.code = '{$cod}'";
 
     $sql = $db->read($select, 'hnd_franquia', 'fra', array(), null);
 
     if (count($sql) > 0) {
-        return $sql[0]['description'] . ' - ' . $sql[0]['district'] . ' - ' . $sql[0]['state'];
+        //return $sql[0]['description'] . ' - ' . $sql[0]['district'] . ' - ' . $sql[0]['state'];
+        return $sql[0];
     }
 
     return '';
@@ -281,3 +272,404 @@ function getProd($cod, MySqlPDO $db)
 
     return '';
 }
+
+function efetuaPedido($cookieFile, $val_cdh, $ss_pg, MySqlPDO $db)
+{
+    $post = array(
+        'acao' => 'credito_consultor',
+        'idconsultor' => HND_USER,
+    );
+
+    $result = executaAcaoProdutos($post, $cookieFile, true);
+
+    $retorno = $result['exec'];
+
+    $vl_credito = explode('|',$retorno)[1];
+
+    var_dump($retorno);
+
+    exit;
+
+    $post = array(
+        'acao' => 'car_lista_item',
+        'idconsultor' => HND_USER,
+        'ss_pg' => $ss_pg,
+        'id_cdhret' => $val_cdh,
+        'atv_cad_cons' => '1',
+        'atv_cons' => '1'
+    );
+
+    $result = executaAcaoProdutos($post, $cookieFile, true);
+
+    $retorno = json_decode($result['exec'], true);
+
+    $arrayProdutos = array();
+    $valor_subtotal_pedido = 0.00;
+    $valor_total_pedido = 0.00;
+    $pontos_total_pedido = 0;
+    $peso_total_item = 0;
+    $peso_total_pedido = 0;
+    $valorDesconto = 0.00;
+
+    foreach ($retorno as $val) {
+
+        $idProduto = $val['Car_prod_codigo'];
+        $qtdProduto = $arrayProdutos[$val['Car_prod_codigo']];
+        $cdCarrinho = $val['CdCarrinho'];
+
+        foreach ($retorno as $value) {
+            if ($value['Car_prod_codigo'] == $idProduto && $value['CdCarrinho'] != $cdCarrinho) {
+                $qtdProduto++;
+            }
+        }
+
+        $vqtd_total_item = $qtdProduto;
+        $valor_subtotal_pedido += eval($vqtd_total_item * $val['Car_prod_valor_unt']);
+        $valor_total_item = eval($vqtd_total_item * ($val['Car_prod_valor_unt'] - $val['Car_prod_desconto']));
+        $valor_total_pedido += $valor_total_item;
+        $pontos_total_item = eval($vqtd_total_item * $val['Car_prod_pontuacao']);
+        $pontos_total_pedido += $pontos_total_item;
+
+        if ($val['Car_prod_peso'] != '') {
+            $peso_total_item = eval($qtdProduto * $val['Car_prod_peso']);
+            $peso_total_pedido += $peso_total_item;
+        }
+
+        $valorDesconto += $val['Car_prod_desconto'];
+    }
+
+    if ($vl_credito >= $valor_total_pedido) {
+        $valor_total_pedido_cred = 0.00;
+    } else {
+        $valor_total_pedido_cred = $valor_total_pedido - eval(number_format($vl_credito, 2, '.', ''));
+    }
+
+    $valor_total_pedido = number_format($valor_total_pedido_cred, 2, '.', '');
+    $valor_subtotal_pedido = number_format($valor_subtotal_pedido, 2, '.', '');
+    $peso_total_pedido = number_format($peso_total_pedido, 3);
+
+    // ----------
+
+    $valor_credito_usado = 0.00;
+    $valor_total_pedido_calc = 0.00;
+
+    if ($vl_credito >= $valor_subtotal_pedido) {
+        $valor_credito_usado = number_format($valor_subtotal_pedido, 2, '.', '');
+    } else {
+        $valor_total_pedido_calc = $valor_subtotal_pedido - eval(number_format($vl_credito, 2, '.', ''));
+        $valor_credito_usado = number_format($vl_credito, 2, '.', '');
+    }
+
+    $valor_total_pedido = number_format($valor_total_pedido_calc, 2, '.', '');
+
+    var_dump($retorno);
+
+    var_dump($valor_subtotal_pedido);
+    var_dump($valor_total_pedido);
+    var_dump($pontos_total_pedido);
+    var_dump($peso_total_pedido);
+    var_dump($vl_credito);
+    var_dump($valor_credito_usado);
+
+    $post = array(
+        'acao' => 'calc_frete_list_transp',
+        'ss_pg' => $ss_pg,
+        'peso_ped' => $peso_total_pedido,
+        'cep_entr' => '',
+        'id_cdhret' => $val_cdh,
+    );
+
+    $result = executaAcaoProdutos($post, $cookieFile, true);
+
+    $retorno = json_decode($result['exec'], true);
+
+    foreach ($retorno as $val) {
+        $vtrans = $val['transporte'];
+    }
+
+    var_dump($retorno);
+
+    var_dump($vtrans);
+
+    exit;
+
+    $cdh_info = getCdh($val_cdh, $db);
+
+    $post = array(
+        'sessao_tipo_compra' => '1',
+        'ss_pg' => $ss_pg,
+        HND_USER => 'sessao_id_cons',
+        'atv_cons' => '1',
+        'atv_cons_bkp' => '1',
+        'atv_cad_cons' => '1',
+        'atv_cad_cons_bkp' => '1',
+        'sessao_modo_entrega' => '2',
+        'sessao_nome_cons' => 'JULIANNA DALMA BORGES VIANNA', // fazer corretamente
+        'id_cdh_retira' => $val_cdh,
+        'id_cdh_retira_desc' => $cdh_info['description'],
+        'email_ped' => 'julianna_dalma@hotmail.com', // fazer corretamente
+        'cdh_retira_email' => $cdh_info['email'],
+        'vl_total_pedido_frete' => '0.00',
+        'vl_sub_total_pedido' => $valor_subtotal_pedido,
+        'vl_total_pedido' => $valor_total_pedido,
+        'pontos_total_pedido' => $pontos_total_pedido,
+        'peso_total_pedido' => $peso_total_pedido,
+        'forma_envio_transp_ped' => $vtrans,
+        'forma_envio_transp_desc_ped' => 'RETIRAR CDH - ' . strtolower($cdh_info['description']) . '  (grátis)',
+        'prazo_transp_ped' => '1',
+        'vl_credito' => $vl_credito, // calcular
+        'vl_credito_usado' => $valor_credito_usado, // calcular
+    );
+
+    $post_fields = http_build_query($post, null, '&');
+
+    $url = 'https://vo.hinode.com.br/vo-2/vo3-gera-pedido-forma-pagamento.asp';
+
+    return CurlHelper::curlPost($url, $post_fields, $cookieFile);
+}
+
+?>
+
+<!--<form name="form-concluir-compra" id="form-concluir-compra" method="post" action="vo3-gera-pedido-forma-pagamento.asp">
+    <input type="hidden" name="ped_desconto" id="ped_desconto" value="0.00">
+    <input type="hidden" name="pontuacao_minima" id="pontuacao_minima" value="0.00">
+    <input type="hidden" name="valor_pedido_minimo" id="valor_pedido_minimo" value="0.00">
+    <input type="hidden" name="tipoKit" id="tipoKit" value="0">
+    <input type="hidden" name="sessao_tipo_compra" id="sessao_tipo_compra" value="1">
+    <input type="hidden" name="ss_pg" id="ss_pg" value="29793890718395338">
+    <input type="hidden" value="00817068" name="sessao_id_cons" id="sessao_id_cons">
+    <input type="hidden" name="atv_cons" id="atv_cons" value="1">
+    <input type="hidden" name="atv_cons_bkp" id="atv_cons_bkp" value="1">
+    <input type="hidden" name="atv_cad_cons" id="atv_cad_cons" value="1">
+    <input type="hidden" name="atv_cad_cons_bkp" id="atv_cad_cons_bkp" value="1">
+    <input type="hidden" name="sessao_modo_entrega" id="sessao_modo_entrega" value="2">
+    <input type="hidden" name="sessao_nome_cons" id="sessao_nome_cons" value="JULIANNA  DALMA BORGES VIANNA">
+    <input type="hidden" name="id_cdh_retira" id="id_cdh_retira" value="10360072">
+    <input type="hidden" name="id_cdh_retira_desc" id="id_cdh_retira_desc" value="VILA VELHA ">
+    <input type="hidden" name="email_ped" id="email_ped" value="julianna_dalma@hotmail.com">
+    <input type="hidden" name="cdh_retira_email" id="cdh_retira_email" value="vilavelha@hinodefranquia.com.br">
+    <input type="hidden" name="sessao_cep" id="sessao_cep" value="">
+    <input type="hidden" name="sessao_endereco" id="sessao_endereco" value="">
+    <input type="hidden" name="sessao_numero" id="sessao_numero" value="">
+    <input type="hidden" name="sessao_complemento" id="sessao_complemento" value="">
+    <input type="hidden" name="sessao_bairro" id="sessao_bairro" value="">
+    <input type="hidden" name="sessao_cidade" id="sessao_cidade" value="">
+    <input type="hidden" name="sessao_estado" id="sessao_estado" value="">
+    <input type="hidden" name="vl_total_pedido_frete" id="vl_total_pedido_frete" value="0.00">
+    <input type="hidden" name="vl_sub_total_pedido" id="vl_sub_total_pedido" value="60.00">
+    <input type="hidden" name="vl_total_pedido" id="vl_total_pedido" value="60.00">
+    <input type="hidden" name="pontos_total_pedido" id="pontos_total_pedido" value="40.00">
+    <input type="hidden" name="peso_total_pedido" id="peso_total_pedido" value="0.350">
+    <input type="hidden" name="forma_envio_transp_ped" id="forma_envio_transp_ped" value="235">
+    <input type="hidden" name="forma_envio_transp_desc_ped" id="forma_envio_transp_desc_ped"
+           value="RETIRAR CDH - Vila Velha  (grátis)">
+    <input type="hidden" name="prazo_transp_ped" id="prazo_transp_ped" value="1">
+    <input type="hidden" name="vl_credito" id="vl_credito" value="0.00">
+    <input type="hidden" name="vl_credito_usado" id="vl_credito_usado" value="0.00">
+    <input type="hidden" name="txt_tit_prod" id="txt_tit_prod" value="">
+    <input type="hidden" name="txt_desc_prod" id="txt_desc_prod" value="">
+    <input type="hidden" name="qtd_minima_kitxcol" id="qtd_minima_kitxcol" value="0">
+    <input type="hidden" name="qtd_total_item" id="qtd_total_item" value="0">
+    <input type="hidden" name="qtd_parc_auto" id="qtd_parc_auto" value="0">
+    <input type="hidden" name="tel" id="tel" value="">
+    <input type="hidden" name="statusATV" id="statusATV" value="4">
+</form>
+
+array(1) {
+[0]=> array(32) {
+    ["CdCarrinho"]=> int(134514332)
+    ["Car_session"]=> string(17) "32576266025474938"
+    ["Car_idConsultor"]=> string(8) "00817068"
+    ["Car_idProduto"]=> int(1270)
+    ["Car_prod_codigo"]=> string(6) "002328"
+    ["Car_prod_nome"]=> string(43) "Traduções Gold nº 28 Masculino 100 ml"
+    ["Car_prod_valor_unt"]=> int(60)
+    ["Car_prod_valor_desc"]=> NULL
+    ["Car_prod_qtd"]=> int(1)
+    ["Car_prod_peso"]=> float(0.35)
+    ["Car_prod_pontuacao"]=> int(40)
+    ["Car_prod_qtd_encomendar"]=> int(0)
+    ["Car_DtCriacao"]=> string(19) "13/06/2016 16:23:51"
+    ["Car_DtAlteracao"]=> NULL
+    ["Car_id_cdh_retira"]=> string(8) "10360072"
+    ["Car_prod_atv_consultor"]=> int(0)
+    ["Car_qtd_minima_kitxcol"]=> int(0)
+    ["Car_prod_ponto_minimo"]=> int(0)
+    ["Car_prod_desconto"]=> NULL
+    ["Car_prod_valor_unt_cat"]=> int(120)
+    ["Car_prod_valor_unt_con"]=> int(60)
+    ["Car_class"]=> int(0)
+    ["Car_tipo_ped"]=> string(16) "CONSULTOR_HINODE"
+    ["Car_obs"]=> NULL
+    ["Car_prod_valor_minimo"]=> int(0)
+    ["Car_prod_voucher"]=> string(10) "0 "
+    ["pedidoOficial"]=> NULL
+    ["prodQtd"]=> NULL
+    ["idLinha"]=> string(2) "27"
+    ["idUso"]=> string(2) "11"
+    ["kit"]=> int(0)
+    ["tipoKit"]=> NULL } }
+
+var meusItens = '';
+var valor_total_item = 0;
+var pontos_total_item = 0;
+var peso_total_item = 0;
+var valor_total_pedido_calc = 0;
+var valor_total_pedido = 0;
+var pontos_total_pedido = 0;
+var peso_total_pedido = 0;
+var encomendar_item = '';
+var vatv_cons = $("#atv_cons").val();
+var vatv_cad_cons = $("#atv_cad_cons").val();
+var vqtd_total_item = 0;
+var prodAtual="";
+var prodUltimo = "";
+var cpd = 0;
+
+if (parseInt(retorno.length, 10) > 0) {
+    var valorDesconto = 0;
+    var valor_subtotal_pedido = 0;
+    var totalMomento = 0;
+    var tipoKit = 0;
+    var arrayProdutos = [];
+    var ativou = false;
+
+    $.each(retorno, function (i, item) {
+        if (item.kit == 1) {
+            tipoKit = item.tipoKit;
+            $("input[name='valor_pedido_minimo']").val(item.Car_prod_valor_minimo);
+
+            if (tipoKit == 2) {
+                listarColonias();
+            } else {
+                $("#list_prod").html("");
+            }
+        }
+        $("#tipoKit").val(tipoKit);
+
+        if (!$.isNumeric(parseInt(arrayProdutos[item.Car_prod_codigo], 10))) {
+            arrayProdutos[item.Car_prod_codigo] = 1;
+            var idProduto = item.Car_prod_codigo;
+            var qtdProduto = arrayProdutos[item.Car_prod_codigo];
+            var cdCarrinho = item.CdCarrinho;
+
+            $.each(retorno, function (i, item) {
+                if (item.Car_prod_codigo == idProduto && item.CdCarrinho != cdCarrinho) {
+                    qtdProduto += 1;
+
+                    if (parseInt(vatv_cad_cons) == 1 && parseInt(vatv_cons) == 0) {
+                        if (parseInt(item.Car_prod_atv_consultor, 10) > 0) {
+                            ativou = true;
+                        }
+                    }
+                }
+            });
+
+            vqtd_total_item = qtdProduto;
+            valor_subtotal_pedido += eval(vqtd_total_item * item.Car_prod_valor_unt);
+            valor_total_item = eval(vqtd_total_item * item.Car_prod_valor_unt - item.Car_prod_desconto);
+            valor_total_pedido += valor_total_item;
+            pontos_total_item = eval(vqtd_total_item * item.Car_prod_pontuacao);
+            pontos_total_pedido += pontos_total_item;
+
+            if (item.Car_prod_peso != '') {
+                peso_total_item = eval(qtdProduto * item.Car_prod_peso);
+                peso_total_pedido += peso_total_item;
+            }
+            valorDesconto += item.Car_prod_desconto;
+
+            if (parseInt(item.Car_prod_ponto_minimo, 10) > 0) {
+                $("#pontuacao_minima").val(number_format(item.Car_prod_ponto_minimo, 2, '.', ''));
+            }
+
+            if (parseInt(item.Car_prod_atv_consultor, 10) > 0 || ativou) {
+                $("#atv_cons").val('1');
+                $("#atv_cad_cons").val('1');
+                $('#msg_atv').html("");
+            }
+
+            if (parseInt(item.Car_prod_codigo, 10) == parseInt($("#txt_prod").val(), 10) && parseInt(qtdProduto, 10) < parseInt($("#txt_qtd").val(), 10)) {
+                bootbox.alert("ATENÇÃO: QUANTIDADE SOLICITADA INDISPONÍVEL, QUANTIDADE DISPONÍVEL " + qtdProduto, function () { });
+                $("#txt_prod").val("");
+                $("#txt_qtd").val("");
+            }
+
+            vnome_prod = item.Car_prod_nome.replace(new RegExp("\\n", "g"), "").replace(new RegExp("\\<br>", "g"), " ");
+            var bg_tr = "";
+            if (parseInt(item.Car_prod_atv_consultor, 10) == 1 || ativou) {
+                ativou = false;
+            }
+
+            prodAtual = item.Car_prod_codigo;
+            if (prodUltimo == "") {
+                prodUltimo = prodAtual;
+            }
+
+            if (prodAtual != prodUltimo) {
+                prodUltimo = prodAtual;
+                cpd++;
+            }
+
+            if (cpd % 2 == 1) {
+                bg_tr = "";
+            } else {
+                bg_tr = "#FFC";
+            }
+
+            meusItens += '<tr>';
+            meusItens += '	<td style="background-color:' + bg_tr + '">' + item.Car_prod_codigo + '</td>';
+            meusItens += '	<td style="background-color:' + bg_tr + '">' + vnome_prod + '</td>';
+            meusItens += '	<td style="background-color:' + bg_tr + '">';
+            meusItens += '<div class="ace-spinner" style="width: 70px;">';
+            meusItens += '	<div class="input-group">';
+            meusItens += '		<input type="text" name="qtd-produto" value="' + qtdProduto + '" id="" class="input-mini spinner1 spinner-input form-control" maxlength="3" disabled="true">';
+            meusItens += '		<div class="spinner-buttons input-group-btn btn-group-vertical">';
+            meusItens += '			<button class="btn spinner-up btn-xs btn-info" type="button" onClick="Fc_additemcar(\'' + item.Car_prod_codigo + '\',1);">';
+            meusItens += '			    <i class="icon-chevron-up"></i>	';
+            meusItens += '			</button>';
+            meusItens += '			<button class="btn spinner-down btn-xs btn-info" type="button" onClick="Fc_delitemcar(\'' + item.Car_prod_codigo + '\',1,' + item.kit + ');">';
+            meusItens += '			    <i class="icon-chevron-down"></i>';
+            meusItens += '			</button>';
+            meusItens += '		</div>';
+            meusItens += '	</div>';
+            meusItens += '</div>';
+            meusItens += '	</td>';
+            meusItens += '	<td style="background-color:' + bg_tr + '">R$ ' + number_format(item.Car_prod_valor_unt, 2, ',', '.') + '</td>';
+            meusItens += '	<td style="background-color:' + bg_tr + '">R$ ' + number_format(item.Car_prod_desconto, 2, ',', '.') + '</td>';
+            meusItens += '	<td style="background-color:' + bg_tr + '">R$ ' + number_format(valor_total_item, 2, ',', '.') + '</td>';
+            meusItens += '	<td style="background-color:' + bg_tr + '">' + number_format(item.Car_prod_pontuacao * qtdProduto, 2, ',', '.') + '</td>';
+            meusItens += '	<td style="background-color:' + bg_tr + '">';
+            meusItens += '		<div class="visible-md visible-lg hidden-sm hidden-xs btn-group">';
+            meusItens += '			<button class="btn btn-xs btn-danger" onClick="Fc_delitemcar(\'' + item.Car_prod_codigo + '\',' + qtdProduto + ',' + item.kit + ');">';
+            meusItens += '				<i class="icon-trash bigger-120"></i>';
+            meusItens += '			</button>';
+            meusItens += '		</div>';
+            meusItens += '	</td>';
+            meusItens += '</tr>';
+        }
+    });
+
+    var vl_credito = $("#vl_credito").val() == "" ? "0.00" : $("#vl_credito").val();
+    var valor_total_pedido_cred = 0.00;
+    $("#qtd_total_item").val(vqtd_total_item - 1);
+    $('#carrinho-container').show();
+    $('#carrinho_lista').html(meusItens);
+    $("#ped_desconto").val(number_format(valorDesconto, 2, '.', ''));
+
+    if (vl_credito >= valor_total_pedido) {
+        valor_total_pedido_cred = 0.00;
+    } else {
+        valor_total_pedido_cred = valor_total_pedido - eval(number_format(vl_credito, 2, '.', ''));
+    }
+
+    $('#txt_vl_total_pedido').html('R$ ' + number_format(valor_total_pedido_cred, 2, ',', '.'));
+    $('#vl_total_pedido').val(number_format(valor_total_pedido_cred, 2, '.', ''));
+    $('#vl_sub_total_pedido').val(number_format(valor_subtotal_pedido, 2, '.', ''));
+    $('#txt_pontos_total_pedido').html('' + number_format(pontos_total_pedido, 2, ',', '.'));
+    $('#txt_desconto_pedido').html('R$ ' + number_format(valorDesconto, 2, ',', '.'));
+    $('#txt_vl_subtotal_pedido').html('R$ ' + number_format(valor_subtotal_pedido, 2, ',', '.'));
+    $('#pontos_total_pedido').val(number_format(pontos_total_pedido, 2, '.', ''));
+    $('#peso_total_pedido').val(number_format(peso_total_pedido, 3));
+
+
+-->
