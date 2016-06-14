@@ -31,10 +31,10 @@ if (count($captcha) > 0) {
 
     $post = array(
         'login_tipo_id' => 'idconsultor',
-        'rede_usuario' => HND_USER,
-        'rede_senha' => HND_PASS,
-        'txtValor' => $captchaDecode,
-        'entrar' => 'Entrar'
+        'rede_usuario'  => HND_USER,
+        'rede_senha'    => HND_PASS,
+        'txtValor'      => $captchaDecode,
+        'entrar'        => 'Entrar'
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -72,6 +72,15 @@ if (count($captcha) > 0) {
 
         $ss_pg = $find_ss_pg[0]->attr['value'];
 
+        $find_vl_credito = $html->find('input[id=vl_credito]');
+
+        if (!count($find_vl_credito) > 0) {
+            echo 'Houve um erro ao acessar o sistema da hinode. Erro 5';
+            exit;
+        }
+
+        $vl_credito = $find_vl_credito[0]->attr['value'];
+
         $idconsultor = HND_USER;
 
         $searchProdutos = explode(',', $_GET['cod_produtos']);
@@ -100,19 +109,19 @@ if (count($captcha) > 0) {
                     foreach ($searchProdutos as $val_prod) {
 
                         $post = array(
-                            'acao' => 'car_add_item',
-                            'idconsultor' => $idconsultor,
-                            'id_cdhret' => $val_cdh,
-                            'loc_prod' => $val_prod,
-                            'qtd_prod' => '1',
-                            'ss_pg' => $ss_pg,
-                            'regra_estoque' => '0',
-                            'atv_cons' => '0',
-                            'atv_cad_cons' => '1',
-                            'vl_sub_ped' => '0.00',
+                            'acao'             => 'car_add_item',
+                            'idconsultor'      => $idconsultor,
+                            'id_cdhret'        => $val_cdh,
+                            'loc_prod'         => $val_prod,
+                            'qtd_prod'         => '1',
+                            'ss_pg'            => $ss_pg,
+                            'regra_estoque'    => '0',
+                            'atv_cons'         => '0',
+                            'atv_cad_cons'     => '1',
+                            'vl_sub_ped'       => '0.00',
                             'valor_minimo_kit' => '0.00',
                             'ponto_minimo_kit' => '0.00',
-                            'atv_cons_bkp' => '0',
+                            'atv_cons_bkp'     => '0',
                             'atv_cad_cons_bkp' => '1',
                         );
 
@@ -125,12 +134,12 @@ if (count($captcha) > 0) {
                             if (!$efetuar_pedido) {
 
                                 $post = array(
-                                    'acao' => 'car_del_item',
-                                    'idconsultor' => $idconsultor,
-                                    'loc_prod' => $val_prod,
-                                    'qtd_prod' => '1',
-                                    'ss_pg' => $ss_pg,
-                                    'atv_cad_cons' => '1',
+                                    'acao'             => 'car_del_item',
+                                    'idconsultor'      => $idconsultor,
+                                    'loc_prod'         => $val_prod,
+                                    'qtd_prod'         => '1',
+                                    'ss_pg'            => $ss_pg,
+                                    'atv_cad_cons'     => '1',
                                     'atv_cad_cons_bkp' => '1',
                                 );
 
@@ -144,7 +153,7 @@ if (count($captcha) > 0) {
                     if ($efetuar_pedido && $count > 0) {
 
                         $post = array(
-                            'acao' => 'validar-carrinho',
+                            'acao'  => 'validar-carrinho',
                             'ss_pg' => $ss_pg,
                         );
 
@@ -157,11 +166,9 @@ if (count($captcha) > 0) {
                             $exp = explode('|', $retorno);
 
                             if ($exp[0] === '0') {
-                                efetuaPedido($cookieFile, $val_cdh, $ss_pg, $db);
+                                efetuaPedido($cookieFile, $val_cdh, $ss_pg, $vl_credito, $db);
                             }
                         }
-
-                        exit;
                     }
                 }
             }
@@ -273,30 +280,16 @@ function getProd($cod, MySqlPDO $db)
     return '';
 }
 
-function efetuaPedido($cookieFile, $val_cdh, $ss_pg, MySqlPDO $db)
+function efetuaPedido($cookieFile, $val_cdh, $ss_pg, $vl_credito, MySqlPDO $db)
 {
-    $post = array(
-        'acao' => 'credito_consultor',
-        'idconsultor' => HND_USER,
-    );
-
-    $result = executaAcaoProdutos($post, $cookieFile, true);
-
-    $retorno = $result['exec'];
-
-    $vl_credito = explode('|',$retorno)[1];
-
-    var_dump($retorno);
-
-    exit;
 
     $post = array(
-        'acao' => 'car_lista_item',
-        'idconsultor' => HND_USER,
-        'ss_pg' => $ss_pg,
-        'id_cdhret' => $val_cdh,
+        'acao'         => 'car_lista_item',
+        'idconsultor'  => HND_USER,
+        'ss_pg'        => $ss_pg,
+        'id_cdhret'    => $val_cdh,
         'atv_cad_cons' => '1',
-        'atv_cons' => '1'
+        'atv_cons'     => '1'
     );
 
     $result = executaAcaoProdutos($post, $cookieFile, true);
@@ -306,13 +299,14 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, MySqlPDO $db)
     $arrayProdutos = array();
     $valor_subtotal_pedido = 0.00;
     $valor_total_pedido = 0.00;
-    $pontos_total_pedido = 0;
+    $pontos_total_pedido = 0.00;
     $peso_total_item = 0;
     $peso_total_pedido = 0;
     $valorDesconto = 0.00;
 
     foreach ($retorno as $val) {
 
+        $arrayProdutos[$val['Car_prod_codigo']] = 1;
         $idProduto = $val['Car_prod_codigo'];
         $qtdProduto = $arrayProdutos[$val['Car_prod_codigo']];
         $cdCarrinho = $val['CdCarrinho'];
@@ -324,14 +318,14 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, MySqlPDO $db)
         }
 
         $vqtd_total_item = $qtdProduto;
-        $valor_subtotal_pedido += eval($vqtd_total_item * $val['Car_prod_valor_unt']);
-        $valor_total_item = eval($vqtd_total_item * ($val['Car_prod_valor_unt'] - $val['Car_prod_desconto']));
+        $valor_subtotal_pedido += $vqtd_total_item * $val['Car_prod_valor_unt'];
+        $valor_total_item = $vqtd_total_item * ($val['Car_prod_valor_unt'] - $val['Car_prod_desconto']);
         $valor_total_pedido += $valor_total_item;
-        $pontos_total_item = eval($vqtd_total_item * $val['Car_prod_pontuacao']);
+        $pontos_total_item = $vqtd_total_item * $val['Car_prod_pontuacao'];
         $pontos_total_pedido += $pontos_total_item;
 
         if ($val['Car_prod_peso'] != '') {
-            $peso_total_item = eval($qtdProduto * $val['Car_prod_peso']);
+            $peso_total_item = $qtdProduto * $val['Car_prod_peso'];
             $peso_total_pedido += $peso_total_item;
         }
 
@@ -341,11 +335,12 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, MySqlPDO $db)
     if ($vl_credito >= $valor_total_pedido) {
         $valor_total_pedido_cred = 0.00;
     } else {
-        $valor_total_pedido_cred = $valor_total_pedido - eval(number_format($vl_credito, 2, '.', ''));
+        $valor_total_pedido_cred = $valor_total_pedido - number_format($vl_credito, 2, '.', '');
     }
 
     $valor_total_pedido = number_format($valor_total_pedido_cred, 2, '.', '');
     $valor_subtotal_pedido = number_format($valor_subtotal_pedido, 2, '.', '');
+    $pontos_total_pedido  = number_format($pontos_total_pedido, 2, '.', '');
     $peso_total_pedido = number_format($peso_total_pedido, 3);
 
     // ----------
@@ -356,26 +351,17 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, MySqlPDO $db)
     if ($vl_credito >= $valor_subtotal_pedido) {
         $valor_credito_usado = number_format($valor_subtotal_pedido, 2, '.', '');
     } else {
-        $valor_total_pedido_calc = $valor_subtotal_pedido - eval(number_format($vl_credito, 2, '.', ''));
+        $valor_total_pedido_calc = $valor_subtotal_pedido - number_format($vl_credito, 2, '.', '');
         $valor_credito_usado = number_format($vl_credito, 2, '.', '');
     }
 
     $valor_total_pedido = number_format($valor_total_pedido_calc, 2, '.', '');
 
-    var_dump($retorno);
-
-    var_dump($valor_subtotal_pedido);
-    var_dump($valor_total_pedido);
-    var_dump($pontos_total_pedido);
-    var_dump($peso_total_pedido);
-    var_dump($vl_credito);
-    var_dump($valor_credito_usado);
-
     $post = array(
-        'acao' => 'calc_frete_list_transp',
-        'ss_pg' => $ss_pg,
-        'peso_ped' => $peso_total_pedido,
-        'cep_entr' => '',
+        'acao'      => 'calc_frete_list_transp',
+        'ss_pg'     => $ss_pg,
+        'peso_ped'  => $peso_total_pedido,
+        'cep_entr'  => '',
         'id_cdhret' => $val_cdh,
     );
 
@@ -385,47 +371,107 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, MySqlPDO $db)
 
     foreach ($retorno as $val) {
         $vtrans = $val['transporte'];
+        $vtrans_desc = $val['descricao'];
+        $vtrans_prazo = $val['prazo'];
     }
-
-    var_dump($retorno);
-
-    var_dump($vtrans);
-
-    exit;
 
     $cdh_info = getCdh($val_cdh, $db);
 
     $post = array(
-        'sessao_tipo_compra' => '1',
-        'ss_pg' => $ss_pg,
-        HND_USER => 'sessao_id_cons',
-        'atv_cons' => '1',
-        'atv_cons_bkp' => '1',
-        'atv_cad_cons' => '1',
-        'atv_cad_cons_bkp' => '1',
-        'sessao_modo_entrega' => '2',
-        'sessao_nome_cons' => 'JULIANNA DALMA BORGES VIANNA', // fazer corretamente
-        'id_cdh_retira' => $val_cdh,
-        'id_cdh_retira_desc' => $cdh_info['description'],
-        'email_ped' => 'julianna_dalma@hotmail.com', // fazer corretamente
-        'cdh_retira_email' => $cdh_info['email'],
-        'vl_total_pedido_frete' => '0.00',
-        'vl_sub_total_pedido' => $valor_subtotal_pedido,
-        'vl_total_pedido' => $valor_total_pedido,
-        'pontos_total_pedido' => $pontos_total_pedido,
-        'peso_total_pedido' => $peso_total_pedido,
-        'forma_envio_transp_ped' => $vtrans,
-        'forma_envio_transp_desc_ped' => 'RETIRAR CDH - ' . strtolower($cdh_info['description']) . '  (grátis)',
-        'prazo_transp_ped' => '1',
-        'vl_credito' => $vl_credito, // calcular
-        'vl_credito_usado' => $valor_credito_usado, // calcular
+        'sessao_tipo_compra'          => '1',
+        'ss_pg'                       => $ss_pg,
+        HND_USER                      => 'sessao_id_cons',
+        'atv_cons'                    => '1',
+        'atv_cons_bkp'                => '1',
+        'atv_cad_cons'                => '1',
+        'atv_cad_cons_bkp'            => '1',
+        'sessao_modo_entrega'         => '2',
+        //'sessao_nome_cons'            => 'JULIANNA DALMA BORGES VIANNA', // fazer corretamente
+        'id_cdh_retira'               => $val_cdh,
+        'id_cdh_retira_desc'          => $cdh_info['description'],
+        //'email_ped'                   => 'julianna_dalma@hotmail.com', // fazer corretamente
+        'cdh_retira_email'            => $cdh_info['email'],
+        'vl_total_pedido_frete'       => '0.00',
+        'vl_sub_total_pedido'         => $valor_subtotal_pedido,
+        'vl_total_pedido'             => $valor_total_pedido,
+        'pontos_total_pedido'         => $pontos_total_pedido,
+        'peso_total_pedido'           => $peso_total_pedido,
+        'forma_envio_transp_ped'      => $vtrans,
+        'forma_envio_transp_desc_ped' => $vtrans_desc,
+        'prazo_transp_ped'            => $vtrans_prazo,
+        'vl_credito'                  => $vl_credito,
+        'vl_credito_usado'            => $valor_credito_usado,
     );
 
     $post_fields = http_build_query($post, null, '&');
 
     $url = 'https://vo.hinode.com.br/vo-2/vo3-gera-pedido-forma-pagamento.asp';
 
-    return CurlHelper::curlPost($url, $post_fields, $cookieFile);
+    $result = CurlHelper::curlPost($url, $post_fields, $cookieFile);
+
+    $html = new Simple_html_dom($result['exec']);
+
+    $find_pagamento = $html->find('input[name=pagamento]');
+
+    if (!count($find_pagamento) > 0) {
+        echo 'Houve um erro ao acessar o sistema da hinode. Erro 7';
+        exit;
+    }
+
+    $pagamento = $find_pagamento[0]->attr['value'];
+
+    $find_desc_forma_pag = $html->find('input[id=desc_forma_pag]');
+
+    if (!count($find_desc_forma_pag) > 0) {
+        echo 'Houve um erro ao acessar o sistema da hinode. Erro 8';
+        exit;
+    }
+
+    $desc_forma_pag = $find_desc_forma_pag[0]->attr['value'];
+
+    $post = array(
+        'acao'                        => 'gera_pedido',
+        'idconsultor'                 => HND_USER,
+        'ss_pg'                       => $ss_pg,
+        'sessao_modo_entrega'         => '2',
+        //'nome_cons'                   => 'JULIANNA DALMA BORGES VIANNA', // fazer corretamente
+        'id_cdhret'                   => $val_cdh,
+        'id_cdhret_desc'              => $cdh_info['description'],
+        'id_forma_pag'                => $pagamento,
+        'desc_forma_pag'              => $desc_forma_pag,
+        'vl_frete'                    => '0.00',
+        'vl_ped'                      => $valor_total_pedido,
+        'vl_sub_ped'                  => $valor_subtotal_pedido,
+        'pontos_ped'                  => $pontos_total_pedido,
+        'peso_ped'                    => $peso_total_pedido,
+        'prazo_transp_ped'            => $vtrans_prazo,
+        'forma_envio_transp_ped'      => $vtrans,
+        'qtd_parc'                    => '1',
+        'status_ped'                  => '1',
+        'forma_envio_transp_desc_ped' => $vtrans_desc,
+        //'email_ped'                   => 'julianna_dalma@hotmail.com', // fazer corretamente
+        'email_cdh'                   => $cdh_info['email'],
+        'vl_credito_usado'            => $valor_credito_usado,
+        'ped_juros'                   => '0',
+        'ped_tipo'                    => 'CONSULTOR>HINODE',
+        'qtd_parc_auto'               => '0',
+        'valorDesconto'               => '',
+        'valorExcedente'              => '',
+        'tipoKit'                     => '0',
+        'vtel'                        => '',
+        'idlogcons'                   => '',
+        'desc_forma_pag_verf'         => '2',
+    );
+
+    $post_fields = http_build_query($post, null, '&');
+
+    $url = 'https://vo.hinode.com.br/vo-2/vo3_ajax_consultor_gera_pedido.asp';
+
+    $result = CurlHelper::curlPost($url, $post_fields, $cookieFile);
+
+    $retorno = explode('|',$result['exec']);
+    exit;
+    return $retorno[0];
 }
 
 ?>
