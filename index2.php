@@ -19,9 +19,8 @@
             <div class="pull-right">
                 <a href="<?php echo BASE_URL ?>site/agenteIntegracao/cadastrar" class="btn btn-primary"
                    data-toggle="modal" data-target="#filter_modal">
-                    <span class="glyphicon glyphicon-plus"></span> Clique aqui para selecionar os produtos
+                    <span class="glyphicon glyphicon-th-list"></span> Clique aqui para selecionar os produtos
                 </a>
-
             </div>
 
             <div class="clearfix"></div>
@@ -29,32 +28,48 @@
 
         <div class="panel-body">
 
-            <div class="row">
-                <div class="col-md-12">
+            <form id="formSearch" onsubmit="return false">
 
-                    <form id="testeForm" onsubmit="return false">
+                <input type="hidden" name="pesquisa_opcao" id="pesquisa_opcao">
+
+                <div class="row">
+                    <div class="col-md-12">
                         <div class="form-group">
                             <label for="cod_produtos">Codigos dos Produtos</label>
-                            <textarea class="form-control" id="cod_produtos" rows="8"></textarea>
+                            <textarea class="form-control" name="cod_produtos" id="cod_produtos" rows="8"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="cod_franquias">Codigo Franquias</label>
-                            <textarea class="form-control" id="cod_franquias" rows="8">10360072,10650784,10153011,10615393,10438342</textarea>
+                            <textarea class="form-control" name="cod_franquias" id="cod_franquias" rows="8">10360072,10650784,10153011,10615393,10438342</textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary" onclick="startProcesso()">Pesquisar</button>
-                        <button class="btn btn-default" onclick="$('#cod_produtos').val('')">
-                            Limpar Produtos
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <button type="submit" class="btn btn-primary"
+                                onclick="$('#pesquisa_opcao').val('pesquisar_visualizar');startProcesso()">
+                            <i class="glyphicon glyphicon-search"></i> Pesquisar e Visualizar
                         </button>
-                        <button class="btn btn-default" onclick="$('#cod_franquias').val('')">
-                            Limpar Franquias
+
+                        <button type="submit" class="btn btn-success" data-toggle="modal" data-target="#confirma_pedido_modal">
+                            <i class="glyphicon glyphicon-ok"></i> Pesquisar e Efetuar Pedido
                         </button>
-                    </form>
+
+                        <button class="btn btn-danger " onclick="$('#cod_produtos').val('')">
+                            <i class="glyphicon glyphicon-remove-circle"></i> Limpar Produtos
+                        </button>
+
+                        <button class="btn btn-danger" onclick="$('#cod_franquias').val('')">
+                            <i class="glyphicon glyphicon-remove-circle"></i> Limpar Franquias
+                        </button>
+
+                    </div>
 
                 </div>
-            </div>
-
+            </form>
         </div>
-
     </div>
 
     <br>
@@ -139,11 +154,29 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Concluido</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="confirma_pedido_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Voce deseja realmente pesquisar e efetuar os pedidos?</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal"
+                            onclick="$('#pesquisa_opcao').val('pesquisar_pedido');startProcesso()">Proseguir
+                    </button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
 
     <?php include('footer_js.phtml') ?>
 
@@ -162,7 +195,7 @@
 
             startDate = new Date();
 
-            $('html, body').animate({scrollTop:$('#result').offset().top}, 2000);
+            $('html, body').animate({scrollTop: $('#result').offset().top}, 2000);
 
             var result_loading = '';
 
@@ -171,7 +204,7 @@
             result_loading += '<div class="progress">';
             result_loading += '<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100"';
             result_loading += 'aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span';
-            result_loading += 'class="sr-only">Pesquisando...</span></div>';
+            result_loading += 'class="sr-only">Aguarde...</span></div>';
             result_loading += '</div>';
             result_loading += '</li>';
             result_loading += '</ul>';
@@ -180,13 +213,14 @@
 
             $.ajax({
                     type: "GET",
-                    url: "<?php echo BASE_URL ?>ajaxVerificaProdutos2.php?cod_produtos=" + $("#cod_produtos").val() + "&cod_franquias=" + $("#cod_franquias").val()
+                    data: $('#formSearch').serialize(),
+                    url: "<?php echo BASE_URL ?>ajaxVerificaProdutos2.php"
                 })
                 .done(function (data) {
 
                     $('#result').html(data);
 
-                    $('html, body').animate({scrollTop:$('#result').offset().top}, 2000);
+                    $('html, body').animate({scrollTop: $('#result').offset().top}, 2000);
 
                     endDate = new Date();
 
@@ -210,7 +244,7 @@
 
                     log_duracao = h + ':' + m + ':' + s;
 
-                    $('#result').append('<p>Tempo da pesquisa: ' + txtDuracao + '</p>');
+                    $('#result').append('<p>Tempo de execucao: ' + txtDuracao + '</p>');
                 })
         }
 
