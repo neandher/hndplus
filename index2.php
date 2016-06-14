@@ -170,7 +170,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal"
-                            onclick="$('#pesquisa_opcao').val('pesquisar_pedido');startProcesso()">Proseguir
+                            onclick="$('#pesquisa_opcao').val('pesquisar_pedido');startProcesso()">Prosseguir
                     </button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
                 </div>
