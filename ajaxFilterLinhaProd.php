@@ -35,7 +35,8 @@ if (count($sql) > 0) {
             <?php
             foreach ($sql as $ind => $val) {
                 ?>
-                <a href="#" class="list-group-item" onclick="updateCodProd('<?php echo listaProdPorSca($val['code'], $db) ?>')">
+                <a href="#" class="list-group-item"
+                   onclick="updateCodProd('<?php echo listaProdPorSca($val['code'], $db) ?>')">
                     <h4 class="list-group-item-heading"><?php echo $val['name'] ?>
                         (<?php echo $val['code'] ?>)</h4>
                 </a>
@@ -60,7 +61,7 @@ function listaProdPorSca($sca_id, $db)
 
     $select = new SelectSqlHelper();
 
-    $select->fields = "pro.code";
+    $select->fields = "pro.code,pro.name";
     $select->innerjoin = $innerJoin;
     $select->where = $where;
     $select->orderby = 'pro.code asc';
@@ -70,8 +71,8 @@ function listaProdPorSca($sca_id, $db)
     $str = '';
 
     foreach ($result as $ind => $value) {
-        $str .= $value['code'] . ',';
+        $str .= $value['code'] . '|' . $value['name'] . ',';
     }
 
-    return substr($str, 0, (strlen($str)-1));
+    return substr($str, 0, (strlen($str) - 1));
 }

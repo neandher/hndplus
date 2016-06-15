@@ -37,7 +37,8 @@
                         <div class="form-group">
                             <label for="cod_produtos">Codigos dos Produtos</label>
                             <!--<textarea class="form-control" name="cod_produtos" id="cod_produtos" rows="8" ></textarea>-->
-                            <input type="text" name="cod_produtos" id="cod_produtos" data-role="tagsinput" class="form-control">
+                            <br>
+                            <input type="text" name="cod_produtos" id="cod_produtos" class="form-control">
                         </div>
                         <div class="form-group">
                             <label for="cod_franquias">Codigo Franquias</label>
@@ -54,7 +55,8 @@
                             <i class="glyphicon glyphicon-search"></i> Pesquisar e Visualizar
                         </button>
 
-                        <button type="submit" class="btn btn-success" data-toggle="modal" data-target="#confirma_pedido_modal">
+                        <button type="submit" class="btn btn-success" data-toggle="modal"
+                                data-target="#confirma_pedido_modal">
                             <i class="glyphicon glyphicon-ok"></i> Pesquisar e Efetuar Pedido
                         </button>
 
@@ -328,16 +330,28 @@
                     $('#filter_fran_results').html('');
                 }
             });
+
+            $('#cod_produtos').tagsinput({
+                allowDuplicates: false,
+                itemValue: 'id',  // this will be used to set id of tag
+                itemText: 'label' // this will be used to set text of tag
+            });
         });
 
         function updateCodProd(val) {
-            cod_prod = $("#cod_produtos").val().split('|');
-            
+
+            prod_split = val.split(',');
+
+            for (i = 0; i < prod_split.length; i++) {
+                $("#cod_produtos").tagsinput('add', {
+                    id: prod_split[i].split(',')[0],
+                    label: prod_split[i].split(',')[1]
+                })
+            }
+
             //$("#cod_produtos").val(cod_prod + val + ',');
             $('#filter_prod_results').html('');
-            $('#filter_prod').val('');
-            $('#filter_prod').focus();
-            $("#cod_produtos").tagsinput('add', val)
+            $('#filter_prod').val('').focus();
         }
 
         function updateCodFran(val) {

@@ -42,7 +42,7 @@ if (count($sql) > 0) {
             foreach ($sql as $ind => $val) {
                 ?>
 
-                <tr style="cursor: pointer" onclick="updateCodProd('<?php echo $val['code'] ?>|<?php echo $val['name'] ?>')">
+                <tr style="cursor: pointer" onclick="updateCodProd('<?php echo $val['code'] ?>|<?php echo $val['name'].',' ?>')">
                     <th scope="row">
                         <img src="https://online.hinode.com.br/produtos/<?php echo $val['code'] ?>_p.jpg"
                              onerror="this.src='web-files/default.jpg'"/>
