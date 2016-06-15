@@ -28,49 +28,49 @@
 
         <div class="panel-body">
 
-            <form id="formSearch" onsubmit="return false">
+            <form id="formSearch" class="form-horizontal" onsubmit="return false">
 
                 <input type="hidden" name="pesquisa_opcao" id="pesquisa_opcao">
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="cod_produtos">Codigos dos Produtos</label>
-                            <!--<textarea class="form-control" name="cod_produtos" id="cod_produtos" rows="8" ></textarea>-->
-                            <br>
-                            <input type="text" name="cod_produtos" id="cod_produtos" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="cod_franquias">Codigo Franquias</label>
-                            <textarea class="form-control" name="cod_franquias" id="cod_franquias" rows="8">10360072,10650784,10153011,10615393,10438342</textarea>
-                        </div>
+                <div class="form-group">
+                    <label for="cod_produtos" class="col-sm-1 control-label">Produtos</label>
+                    <div class="col-sm-11">
+                        <!--<textarea class="form-control" name="cod_produtos" id="cod_produtos" rows="8" ></textarea>-->
+                        <input type="text" name="cod_produtos" id="cod_produtos" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cod_franquias" class="col-sm-1 control-label">Franquias</label>
+                    <div class="col-sm-11">
+                        <!--<textarea class="form-control" name="cod_franquias" id="cod_franquias" rows="8">10360072,10650784,10153011,10615393,10438342</textarea>-->
+                        <input type="text" name="cod_franquias" id="cod_franquias" class="form-control">
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-12">
+                <hr>
 
-                        <button type="submit" class="btn btn-primary"
-                                onclick="$('#pesquisa_opcao').val('pesquisar_visualizar');startProcesso()">
+                <div class="form-group">
+                    <div class="col-sm-offset-1 col-sm-11">
+                        <a href="#" class="btn btn-primary"
+                           onclick="$('#pesquisa_opcao').val('pesquisar_visualizar');startProcesso()">
                             <i class="glyphicon glyphicon-search"></i> Pesquisar e Visualizar
-                        </button>
+                        </a>
 
-                        <button type="submit" class="btn btn-success" data-toggle="modal"
-                                data-target="#confirma_pedido_modal">
+                        <a href="#" class="btn btn-success" data-toggle="modal"
+                           data-target="#confirma_pedido_modal">
                             <i class="glyphicon glyphicon-ok"></i> Pesquisar e Efetuar Pedido
-                        </button>
+                        </a>
 
-                        <button class="btn btn-danger " onclick="$('#cod_produtos').val('')">
+                        <a href="#" class="btn btn-danger " onclick="$('#cod_produtos').val('')">
                             <i class="glyphicon glyphicon-remove-circle"></i> Limpar Produtos
-                        </button>
+                        </a>
 
-                        <button class="btn btn-danger" onclick="$('#cod_franquias').val('')">
+                        <a href="#" class="btn btn-danger" onclick="$('#cod_franquias').val('')">
                             <i class="glyphicon glyphicon-remove-circle"></i> Limpar Franquias
-                        </button>
-
+                        </a>
                     </div>
-
                 </div>
+
             </form>
         </div>
     </div>
@@ -117,7 +117,8 @@
                                 <div class="form-group">
                                     <label for="filter_prod">Digite o código ou o nome dos produtos que desejar
                                         pesquisar</label>
-                                    <input type="text" class="form-control" name="filter_prod" id="filter_prod">
+                                    <input type="text" class="form-control" name="filter_prod" id="filter_prod"
+                                           autocomplete="off">
                                 </div>
 
                                 <div id="filter_prod_results"></div>
@@ -132,7 +133,7 @@
                                     <label for="filter_linha_prod">Digite a linha de produtos que desejar
                                         pesquisar</label>
                                     <input type="text" class="form-control" name="filter_linha_prod"
-                                           id="filter_linha_prod">
+                                           id="filter_linha_prod" autocomplete="off">
                                 </div>
 
                                 <div id="filter_linha_prod_results"></div>
@@ -145,7 +146,8 @@
 
                                 <div class="form-group">
                                     <label for="filter_fran">Digite o nome das franquias que desejar pesquisar</label>
-                                    <input type="text" class="form-control" name="filter_fran" id="filter_fran">
+                                    <input type="text" class="form-control" name="filter_fran" id="filter_fran"
+                                           autocomplete="off">
                                 </div>
 
                                 <div id="filter_fran_results"></div>
@@ -331,11 +333,20 @@
                 }
             });
 
-            $('#cod_produtos').tagsinput({
-                allowDuplicates: false,
+            $('#cod_produtos, #cod_franquias').tagsinput({
+                tagClass: 'label label-info',
+                freeInput: true,
                 itemValue: 'id',  // this will be used to set id of tag
                 itemText: 'label' // this will be used to set text of tag
             });
+
+            //10360072,10650784,10153011,10615393,10438342
+
+            $("#cod_franquias").tagsinput('add', {id: '10360072', label: 'VILA VELHA - PRAIA DA COSTA'});
+            $("#cod_franquias").tagsinput('add', {id: '10650784', label: 'VITORIA - SANTA LUCIA'});
+            $("#cod_franquias").tagsinput('add', {id: '10153011', label: 'VITORIAII - PRAIA DO CANTO'});
+            $("#cod_franquias").tagsinput('add', {id: '10615393', label: 'CARIACICA - JARDIM AMERICA'});
+            $("#cod_franquias").tagsinput('add', {id: '10438342', label: 'SERRA - PQ RESIDENCIAL LARANJEIRAS'});
         });
 
         function updateCodProd(val) {
@@ -343,10 +354,12 @@
             prod_split = val.split(',');
 
             for (i = 0; i < prod_split.length; i++) {
-                $("#cod_produtos").tagsinput('add', {
-                    id: prod_split[i].split(',')[0],
-                    label: prod_split[i].split(',')[1]
-                })
+                if (prod_split[i] != "" && prod_split[i] != null) {
+                    $("#cod_produtos").tagsinput('add', {
+                        id: prod_split[i].split('|')[0],
+                        label: prod_split[i].split('|')[1]
+                    })
+                }
             }
 
             //$("#cod_produtos").val(cod_prod + val + ',');
@@ -355,11 +368,20 @@
         }
 
         function updateCodFran(val) {
-            cod_fran = $("#cod_franquias").val();
-            $("#cod_franquias").val(cod_fran + val + ',');
+
+            fran_split = val.split(',');
+
+            for (i = 0; i < fran_split.length; i++) {
+                if (fran_split[i] != "" && fran_split[i] != null) {
+                    $("#cod_franquias").tagsinput(
+                        'add', {id: fran_split[i].split('|')[0], label: fran_split[i].split('|')[1]}
+                    )
+                }
+            }
+
+            //$("#cod_franquias").val(cod_fran + val + ',');
             $('#filter_fran_results').html('');
-            $('#filter_fran').val('');
-            $('#filter_fran').focus();
+            $('#filter_fran').val('').focus();
         }
 
     </script>

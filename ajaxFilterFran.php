@@ -14,7 +14,7 @@ $where = " fra.description like '%" . $_GET['filter'] . "%' or fra.district like
 $where .= " or fra.city like '%" . $_GET['filter'] . "%' or uf.description like '%" . $_GET['filter'] . "%' ";
 
 $select = new SelectSqlHelper();
-$select->fields = "fra.description,fra.district,fra.city,fra.code,fra.state,uf.description";
+$select->fields = "fra.description,fra.district,fra.city,fra.code,fra.state";
 $select->innerjoin = $innerJoin;
 $select->where = $where;
 $select->orderby = "fra.description asc";
@@ -36,7 +36,8 @@ if (count($sql) > 0) {
             <?php
             foreach ($sql as $ind => $val) {
                 ?>
-                <a href="#" class="list-group-item" onclick="updateCodFran('<?php echo $val['code'] ?>')">
+                <a href="#" class="list-group-item"
+                   onclick="updateCodFran('<?php echo $val['code'] ?>|<?php echo strip_tags(preg_replace('/\s/', ' ', $val['description'] . ' - ' . $val['district'])) ?>,')">
                     <h4 class="list-group-item-heading"><?php echo $val['description'] ?></h4>
                     <p class="list-group-item-text">
                         <?php echo $val['district'] . ' / ' . $val['city'] . ' / ' . $val['state'] ?>

@@ -71,7 +71,7 @@ function listaProdPorSca($sca_id, $db)
     $str = '';
 
     foreach ($result as $ind => $value) {
-        $str .= $value['code'] . '|' . $value['name'] . ',';
+        $str .= $value['code'] . '|' . $value['code'] . ' - ' . strip_tags(preg_replace('/\s/',' ',$value['name'])) . ',';
     }
 
     return substr($str, 0, (strlen($str) - 1));

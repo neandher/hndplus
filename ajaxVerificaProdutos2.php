@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 
 require_once("ajaxIncludes.php");
 
-var_dump($_GET);exit;
+//var_dump($_GET);exit;
 
 $cookieFile = TEMP_PATH . session_id() . '.txt';
 
@@ -207,8 +207,8 @@ if (count($captcha) > 0) {
                 $str .= '<table class="table table-hover">
                         <tr>
                             <th style="max-width: 20%">Imagem</th>
-                            <th>Codigo</th>
-                            <th>Nome</th>';
+                            <th>Nome</th>
+                            <th>Codigo</th>';
 
                 $str .= $efetuar_pedido ? '<th>Status</th>' : '';
 
@@ -224,8 +224,8 @@ if (count($captcha) > 0) {
                                 <img src="https://online.hinode.com.br/produtos/' . $sql_prod['code'] . '_p.jpg" alt="' . $sql_prod['name'] . '"
                                 onerror="this.src=\'web-files/default.jpg\'">
                                 </th>
-                                <td>' . $sql_prod['code'] . '</td>
-                                <td>' . $sql_prod['name'] . '</td>';
+                                <td><h4><span class="label label-success">' . $sql_prod['name'] . '</span></h4></td>
+                                <td><h4><span class="label label-success">' . $sql_prod['code'] . '</span></h4></td>';
 
                     if($efetuar_pedido){
 
