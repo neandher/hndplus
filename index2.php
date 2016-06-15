@@ -14,7 +14,7 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <h4 class="pull-left"><i class="glyphicon glyphicon-list-alt"></i> Pesquisar Produtos</h4>
+            <h4 class="pull-left"><i class="glyphicon glyphicon-list-alt"></i> Pesquisar Produtos Dispon&iacute;veis para Pedido</h4>
 
             <div class="pull-right">
                 <a href="#" class="btn btn-primary"
@@ -61,11 +61,11 @@
                             <i class="glyphicon glyphicon-ok"></i> Pesquisar e Efetuar Pedido
                         </a>
 
-                        <a href="#" class="btn btn-danger " onclick="$('#cod_produtos').val('')">
+                        <a href="#" class="btn btn-danger " onclick="$('#cod_produtos').tagsinput('removeAll')">
                             <i class="glyphicon glyphicon-remove-circle"></i> Limpar Produtos
                         </a>
 
-                        <a href="#" class="btn btn-danger" onclick="$('#cod_franquias').val('')">
+                        <a href="#" class="btn btn-danger" onclick="$('#cod_franquias').tagsinput('removeAll')">
                             <i class="glyphicon glyphicon-remove-circle"></i> Limpar Franquias
                         </a>
                     </div>
@@ -342,11 +342,11 @@
 
             //10360072,10650784,10153011,10615393,10438342
 
-            $("#cod_franquias").tagsinput('add', {id: '10360072', label: 'VILA VELHA - PRAIA DA COSTA'});
-            $("#cod_franquias").tagsinput('add', {id: '10650784', label: 'VITORIA - SANTA LUCIA'});
-            $("#cod_franquias").tagsinput('add', {id: '10153011', label: 'VITORIAII - PRAIA DO CANTO'});
-            $("#cod_franquias").tagsinput('add', {id: '10615393', label: 'CARIACICA - JARDIM AMERICA'});
-            $("#cod_franquias").tagsinput('add', {id: '10438342', label: 'SERRA - PQ RESIDENCIAL LARANJEIRAS'});
+            //$("#cod_franquias").tagsinput('add', {id: '10360072', label: 'VILA VELHA - PRAIA DA COSTA'});
+            //$("#cod_franquias").tagsinput('add', {id: '10650784', label: 'VITORIA - SANTA LUCIA'});
+            //$("#cod_franquias").tagsinput('add', {id: '10153011', label: 'VITORIAII - PRAIA DO CANTO'});
+            //$("#cod_franquias").tagsinput('add', {id: '10615393', label: 'CARIACICA - JARDIM AMERICA'});
+            //$("#cod_franquias").tagsinput('add', {id: '10438342', label: 'SERRA - PQ RESIDENCIAL LARANJEIRAS'});
         });
 
         function updateCodProd(val) {
