@@ -17,7 +17,7 @@
             <h4 class="pull-left"><i class="glyphicon glyphicon-list-alt"></i> Pesquisar Produtos</h4>
 
             <div class="pull-right">
-                <a href="<?php echo BASE_URL ?>site/agenteIntegracao/cadastrar" class="btn btn-primary"
+                <a href="#" class="btn btn-primary"
                    data-toggle="modal" data-target="#filter_modal">
                     <span class="glyphicon glyphicon-th-list"></span> Clique aqui para selecionar os produtos
                 </a>
@@ -36,7 +36,8 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="cod_produtos">Codigos dos Produtos</label>
-                            <textarea class="form-control" name="cod_produtos" id="cod_produtos" rows="8"></textarea>
+                            <!--<textarea class="form-control" name="cod_produtos" id="cod_produtos" rows="8" ></textarea>-->
+                            <input type="text" name="cod_produtos" id="cod_produtos" data-role="tagsinput" class="form-control">
                         </div>
                         <div class="form-group">
                             <label for="cod_franquias">Codigo Franquias</label>
@@ -330,11 +331,13 @@
         });
 
         function updateCodProd(val) {
-            cod_prod = $("#cod_produtos").val();
-            $("#cod_produtos").val(cod_prod + val + ',');
+            cod_prod = $("#cod_produtos").val().split('|');
+            
+            //$("#cod_produtos").val(cod_prod + val + ',');
             $('#filter_prod_results').html('');
             $('#filter_prod').val('');
             $('#filter_prod').focus();
+            $("#cod_produtos").tagsinput('add', val)
         }
 
         function updateCodFran(val) {

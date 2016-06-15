@@ -6,6 +6,8 @@ ini_set('display_errors', 1);
 
 require_once("ajaxIncludes.php");
 
+var_dump($_GET);exit;
+
 $cookieFile = TEMP_PATH . session_id() . '.txt';
 
 $url = 'https://vo.hinode.com.br/vo-2/rede_login.asp';
@@ -206,8 +208,7 @@ if (count($captcha) > 0) {
                         <tr>
                             <th style="max-width: 20%">Imagem</th>
                             <th>Codigo</th>
-                            <th>Nome</th>
-                            <th style="width: 45%;">Descricao</th>';
+                            <th>Nome</th>';
 
                 $str .= $efetuar_pedido ? '<th>Status</th>' : '';
 
@@ -224,8 +225,7 @@ if (count($captcha) > 0) {
                                 onerror="this.src=\'web-files/default.jpg\'">
                                 </th>
                                 <td>' . $sql_prod['code'] . '</td>
-                                <td>' . $sql_prod['name'] . '</td>
-                                <td>' . $sql_prod['description'] . '</td>';
+                                <td>' . $sql_prod['name'] . '</td>';
 
                     if($efetuar_pedido){
 
