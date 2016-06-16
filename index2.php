@@ -14,7 +14,8 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <h4 class="pull-left"><i class="glyphicon glyphicon-list-alt"></i> Pesquisar Produtos Dispon&iacute;veis para Pedido</h4>
+            <h4 class="pull-left"><i class="glyphicon glyphicon-list-alt"></i> Pesquisar Produtos Dispon&iacute;veis
+                para Pedido</h4>
 
             <div class="pull-right">
                 <a href="#" class="btn btn-primary"
@@ -336,17 +337,18 @@
             $('#cod_produtos, #cod_franquias').tagsinput({
                 tagClass: 'label label-info',
                 freeInput: true,
-                itemValue: 'id',  // this will be used to set id of tag
-                itemText: 'label' // this will be used to set text of tag
+                itemValue: 'id',
+                itemText: 'label'
             });
 
-            //10360072,10650784,10153011,10615393,10438342
-
-            //$("#cod_franquias").tagsinput('add', {id: '10360072', label: 'VILA VELHA - PRAIA DA COSTA'});
-            //$("#cod_franquias").tagsinput('add', {id: '10650784', label: 'VITORIA - SANTA LUCIA'});
-            //$("#cod_franquias").tagsinput('add', {id: '10153011', label: 'VITORIAII - PRAIA DO CANTO'});
-            //$("#cod_franquias").tagsinput('add', {id: '10615393', label: 'CARIACICA - JARDIM AMERICA'});
-            //$("#cod_franquias").tagsinput('add', {id: '10438342', label: 'SERRA - PQ RESIDENCIAL LARANJEIRAS'});
+            $.getJSON("<?php echo BASE_URL ?>ajaxGetFranFav.php", function (data) {
+                $.each(data, function (i, item) {
+                    $("#cod_franquias").tagsinput('add', {
+                        id: item.code,
+                        label: item.description + ' - ' + item.district
+                    })
+                })
+            });
         });
 
         function updateCodProd(val) {
@@ -362,7 +364,6 @@
                 }
             }
 
-            //$("#cod_produtos").val(cod_prod + val + ',');
             $('#filter_prod_results').html('');
             $('#filter_prod').val('').focus();
         }
@@ -378,10 +379,49 @@
                     )
                 }
             }
-
-            //$("#cod_franquias").val(cod_fran + val + ',');
+            
             $('#filter_fran_results').html('');
             $('#filter_fran').val('').focus();
+        }
+
+        function addFranFav(franquia) {
+
+            $('#fran_fav_' + franquia).html('aguarde...');
+
+            $.ajax({
+                    type: "GET",
+                    data: $('#formFilter').serialize(),
+                    url: "<?php echo BASE_URL ?>ajaxAddFranFav.php?franquia=" + franquia
+                })
+                .done(function (data) {
+
+                    var_franquia = $('#fran_fav_' + franquia);
+
+                    var_franquia.removeClass('btn-info');
+                    var_franquia.addClass('btn-danger');
+                    var_franquia.html('<span class="glyphicon glyphicon-remove"></span> Remover dos Favoritos');
+                    var_franquia.attr('onclick', 'delFranFav(\'' + franquia + '\')');
+                })
+        }
+
+        function delFranFav(franquia) {
+
+            $('#fran_fav_' + franquia).html('aguarde...');
+
+            $.ajax({
+                    type: "GET",
+                    data: $('#formFilter').serialize(),
+                    url: "<?php echo BASE_URL ?>ajaxDelFranFav.php?franquia=" + franquia
+                })
+                .done(function (data) {
+
+                    var_franquia = $('#fran_fav_' + franquia);
+
+                    var_franquia.removeClass('btn-danger');
+                    var_franquia.addClass('btn-warning');
+                    var_franquia.html('<span class="glyphicon glyphicon-star"></span> Adicionar aos Favoritos');
+                    var_franquia.attr('onclick', 'addFranFav(\'' + franquia + '\')');
+                })
         }
 
     </script>

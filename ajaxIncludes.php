@@ -11,4 +11,5 @@ require('Helpers/Simple_html_dom.php');
 require('Helpers/LoggedExceptionHelper.php');
 require('Database/MySqlPDO.php');
 require('Helpers/SelectSqlHelper.php');
+require('Includes/functions.php');
 	         		

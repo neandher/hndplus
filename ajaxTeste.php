@@ -267,24 +267,6 @@ function todosPedidos($cookieFile)
     var_dump($pedidos);
 }
 
-function insert(Array $dados, $db, $tabela)
-{
-
-    $campos = implode(", ", array_keys($dados));
-
-    foreach ($dados as $ind => $val) {
-        $expVal[] = "?";
-    }
-
-    $expVal = implode(", ", $expVal);
-
-    $con = " INSERT INTO {$tabela} ({$campos}) VALUES ({$expVal}) ";
-
-    $valores = array_values($dados);
-
-    $db->prepareExecute($con, $valores);
-}
-
 /*
 
 Campos Categoria
