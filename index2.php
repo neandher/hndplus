@@ -33,18 +33,25 @@
 
                 <input type="hidden" name="pesquisa_opcao" id="pesquisa_opcao">
 
-                <div class="form-group">
+                <div class="form-group" id="produtos_input">
                     <label for="cod_produtos" class="col-sm-1 control-label">Produtos</label>
                     <div class="col-sm-11">
                         <!--<textarea class="form-control" name="cod_produtos" id="cod_produtos" rows="8" ></textarea>-->
                         <input type="text" name="cod_produtos" id="cod_produtos" class="form-control">
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="franquias_input">
                     <label for="cod_franquias" class="col-sm-1 control-label">Franquias</label>
                     <div class="col-sm-11">
                         <!--<textarea class="form-control" name="cod_franquias" id="cod_franquias" rows="8">10360072,10650784,10153011,10615393,10438342</textarea>-->
                         <input type="text" name="cod_franquias" id="cod_franquias" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group hide" id="pedidos_input">
+                    <label for="cod_pedidos" class="col-sm-1 control-label">Pedido</label>
+                    <div class="col-sm-11">
+                        <input type="text" name="cod_pedidos" id="cod_pedidos" class="form-control">
                     </div>
                 </div>
 
@@ -53,20 +60,27 @@
                 <div class="form-group">
                     <div class="col-sm-offset-1 col-sm-11">
                         <a href="#" class="btn btn-primary"
-                           onclick="$('#pesquisa_opcao').val('pesquisar_visualizar');startProcesso()">
+                           onclick="$('#pesquisa_opcao').val('pesquisar_visualizar');startProcesso()" id="btn_pesquisar_visualizar">
                             <i class="glyphicon glyphicon-search"></i> Pesquisar e Visualizar
                         </a>
 
-                        <a href="#" class="btn btn-success" data-toggle="modal"
+                        <a href="#" class="btn btn-success" id="btn_efetuar_pedido" disabled="disabled"
+                           data-toggle="modal"
                            data-target="#confirma_pedido_modal">
-                            <i class="glyphicon glyphicon-ok"></i> Pesquisar e Efetuar Pedido
+                            <i class="glyphicon glyphicon-ok"></i> Efetuar Pedido
                         </a>
 
-                        <a href="#" class="btn btn-danger " onclick="$('#cod_produtos').tagsinput('removeAll')">
+                        <a href="#" class="btn btn-info hide" id="btn_nova_pesquisa">
+                            <i class="glyphicon glyphicon-plus"></i> Nova Pesquisa
+                        </a>
+
+                        <a href="#" class="btn btn-danger" id="btn_rmv_prod"
+                           onclick="$('#cod_produtos').tagsinput('removeAll')">
                             <i class="glyphicon glyphicon-remove-circle"></i> Limpar Produtos
                         </a>
 
-                        <a href="#" class="btn btn-danger" onclick="$('#cod_franquias').tagsinput('removeAll')">
+                        <a href="#" class="btn btn-danger" id="btn_rmv_fran"
+                           onclick="$('#cod_franquias').tagsinput('removeAll')">
                             <i class="glyphicon glyphicon-remove-circle"></i> Limpar Franquias
                         </a>
                     </div>
@@ -141,7 +155,8 @@
 
                             </div>
 
-                            <div role="tabpanel" class="tab-pane" id="tab_franquias">
+                            <div role="tabpanel" class="tab-pane" id="tab_franquias"
+                                 onclick="add($('#cod_produtos<?php echo $val['code'] ?>').val())">
 
                                 <br>
 
@@ -189,7 +204,19 @@
     <script>
 
         function startProcesso() {
-            executaProcesso();
+
+            switch ($('#pesquisa_opcao').val()) {
+
+                case 'pesquisar_visualizar':
+                    $('#produtos_input, #franquias_input, #btn_pesquisar_visualizar, #btn_rmv_prod, #btn_rmv_fran').hide();
+                    $('#pedidos_input, #btn_nova_pesquisa').removeClass('hide');
+                    executaProcesso("<?php echo BASE_URL ?>ajaxVerificaProdutos2.php");
+                    break;
+
+                case 'pesquisar_pedido':
+                    executaProcesso("<?php echo BASE_URL ?>ajaxEfetuaPedido.php");
+                    break;
+            }
         }
 
         var startDate;
@@ -197,7 +224,7 @@
         var log_duracao;
         var txtDuracao;
 
-        function executaProcesso() {
+        function executaProcesso(urlAjax) {
 
             startDate = new Date();
 
@@ -220,11 +247,13 @@
             $.ajax({
                     type: "GET",
                     data: $('#formSearch').serialize(),
-                    url: "<?php echo BASE_URL ?>ajaxVerificaProdutos2.php"
+                    url: urlAjax
                 })
                 .done(function (data) {
 
                     $('#result').html(data);
+
+                    $('#btn_efetuar_pedido').attr('disabled', false);
 
                     $('html, body').animate({scrollTop: $('#result').offset().top}, 2000);
 
@@ -250,7 +279,7 @@
 
                     log_duracao = h + ':' + m + ':' + s;
 
-                    $('#result').append('<p>Tempo de execucao: ' + txtDuracao + '</p>');
+                    $('#result').append('<div class="alert alert-info" role="alert"><p>Tempo de execucao: ' + txtDuracao + '</p></div>');
                 })
         }
 
@@ -334,7 +363,7 @@
                 }
             });
 
-            $('#cod_produtos, #cod_franquias').tagsinput({
+            $('#cod_produtos, #cod_franquias, #cod_pedidos').tagsinput({
                 tagClass: 'label label-info',
                 freeInput: true,
                 itemValue: 'id',
@@ -348,6 +377,13 @@
                         label: item.description + ' - ' + item.district
                     })
                 })
+            });
+
+            $('#btn_nova_pesquisa').click(function () {
+                $('#produtos_input, #franquias_input, #btn_pesquisar_visualizar, #btn_rmv_prod, #btn_rmv_fran').show();
+                $('#pedidos_input, #btn_nova_pesquisa').addClass('hide');
+                $('#btn_efetuar_pedido').attr('disabled', true);
+                $('#cod_pedidos, #cod_produtos').tagsinput('removeAll');
             });
         });
 
@@ -379,7 +415,7 @@
                     )
                 }
             }
-            
+
             $('#filter_fran_results').html('');
             $('#filter_fran').val('').focus();
         }
@@ -423,9 +459,16 @@
                     var_franquia.attr('onclick', 'addFranFav(\'' + franquia + '\')');
                 })
         }
-        
-        function addProdPedido(prod){
-            alert(prod)
+
+        function addProdPedido(qtd, cod_prod, cod_fran) {
+            $("#cod_pedidos").tagsinput(
+                'add', {
+                    id: cod_prod + '|' + cod_fran + '|' + qtd + '|',
+                    label: $('#txt_fra_' + cod_fran).html() + ' - ' + $('#txt_pro_' + cod_prod).html() + ' ('+cod_prod+') - Quantidade: ' + qtd
+                }
+            );
+
+            $('#input_qnt_pedido_' + cod_prod + '_' + cod_fran).html('<h4><span class="label label-warning"><i class="glyphicon glyphicon-ok"></i> Adicionado ' + qtd + ' itens</span></h4>');
         }
 
     </script>
