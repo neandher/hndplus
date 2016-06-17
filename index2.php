@@ -423,6 +423,10 @@
                     var_franquia.attr('onclick', 'addFranFav(\'' + franquia + '\')');
                 })
         }
+        
+        function addProdPedido(prod){
+            alert(prod)
+        }
 
     </script>
 

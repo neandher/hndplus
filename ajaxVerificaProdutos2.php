@@ -33,10 +33,10 @@ if (count($captcha) > 0) {
 
     $post = array(
         'login_tipo_id' => 'idconsultor',
-        'rede_usuario' => HND_USER,
-        'rede_senha' => HND_PASS,
-        'txtValor' => $captchaDecode,
-        'entrar' => 'Entrar'
+        'rede_usuario'  => HND_USER,
+        'rede_senha'    => HND_PASS,
+        'txtValor'      => $captchaDecode,
+        'entrar'        => 'Entrar'
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -93,19 +93,19 @@ if (count($captcha) > 0) {
                     foreach ($searchProdutos as $val_prod) {
 
                         $post = array(
-                            'acao' => 'car_add_item',
-                            'idconsultor' => $idconsultor,
-                            'id_cdhret' => $val_cdh,
-                            'loc_prod' => $val_prod,
-                            'qtd_prod' => '1',
-                            'ss_pg' => $initDados['ss_pg'],
-                            'regra_estoque' => '0',
-                            'atv_cons' => '0',
-                            'atv_cad_cons' => '1',
-                            'vl_sub_ped' => '0.00',
+                            'acao'             => 'car_add_item',
+                            'idconsultor'      => $idconsultor,
+                            'id_cdhret'        => $val_cdh,
+                            'loc_prod'         => $val_prod,
+                            'qtd_prod'         => '1',
+                            'ss_pg'            => $initDados['ss_pg'],
+                            'regra_estoque'    => '0',
+                            'atv_cons'         => '0',
+                            'atv_cad_cons'     => '1',
+                            'vl_sub_ped'       => '0.00',
                             'valor_minimo_kit' => '0.00',
                             'ponto_minimo_kit' => '0.00',
-                            'atv_cons_bkp' => '0',
+                            'atv_cons_bkp'     => '0',
                             'atv_cad_cons_bkp' => '1',
                         );
 
@@ -116,8 +116,8 @@ if (count($captcha) > 0) {
                             $count++;
 
                             $dadosProduto = array(
-                                'val_prod' => $val_prod,
-                                'ss_pg' => $initDados['ss_pg'],
+                                'val_prod'   => $val_prod,
+                                'ss_pg'      => $initDados['ss_pg'],
                                 'vl_credito' => $initDados['vl_credito'],
                             );
 
@@ -126,12 +126,12 @@ if (count($captcha) > 0) {
                             if (!$efetuar_pedido || ($efetuar_pedido && in_array($val_prod, $check_prod))) {
 
                                 $post = array(
-                                    'acao' => 'car_del_item',
-                                    'idconsultor' => $idconsultor,
-                                    'loc_prod' => $val_prod,
-                                    'qtd_prod' => '1',
-                                    'ss_pg' => $initDados['ss_pg'],
-                                    'atv_cad_cons' => '1',
+                                    'acao'             => 'car_del_item',
+                                    'idconsultor'      => $idconsultor,
+                                    'loc_prod'         => $val_prod,
+                                    'qtd_prod'         => '1',
+                                    'ss_pg'            => $initDados['ss_pg'],
+                                    'atv_cad_cons'     => '1',
                                     'atv_cad_cons_bkp' => '1',
                                 );
 
@@ -160,7 +160,7 @@ if (count($captcha) > 0) {
                 $vl_credito = $data_cdh[$cdh][0]['vl_credito'];
 
                 $post = array(
-                    'acao' => 'validar-carrinho',
+                    'acao'  => 'validar-carrinho',
                     'ss_pg' => $ss_pg,
                 );
 
@@ -195,7 +195,9 @@ if (count($captcha) > 0) {
 
                     $a_cdh[] = $ind;
                     $str .= '<div class="panel panel-primary"><div class="panel-heading">';
-                    $str .= '<strong>' . $cdh_info['description'] . ' - ' . $cdh_info['district'] . ' - ' . $cdh_info['state'] . ' - Total de ' . count($data_cdh[$ind]) . ' iten(s)';
+                    $str .= '<strong>' . $cdh_info['description'] . ' - ' . $cdh_info['district'] . ' - ' . $cdh_info['state'] . ' - Total de ' . count(
+                            $data_cdh[$ind]
+                        ) . ' iten(s)';
 
                     if ($efetuar_pedido && isset($data_cdh[$ind][0]['numero_pedido'])) {
                         $str .= ' - Numero do pedido: ' . $data_cdh[$ind][0]['numero_pedido'];
@@ -208,7 +210,8 @@ if (count($captcha) > 0) {
                         <tr>
                             <th style="max-width: 20%">Imagem</th>
                             <th>Nome</th>
-                            <th>Codigo</th>';
+                            <th>Codigo</th>
+                            <th></th>';
 
                 $str .= $efetuar_pedido ? '<th>Status</th>' : '';
 
@@ -225,21 +228,32 @@ if (count($captcha) > 0) {
                                 onerror="this.src=\'web-files/default.jpg\'">
                                 </th>
                                 <td><h4><span class="label label-success">' . $sql_prod['name'] . '</span></h4></td>
-                                <td><h4><span class="label label-success">' . $sql_prod['code'] . '</span></h4></td>';
+                                <td><h4><span class="label label-success">' . $sql_prod['code'] . '</span></h4></td>
+                                <td>
+                                    <div class="col-md-9">
+                                        <div class="input-group">
+                                          <input type="number" class="form-control" placeholder="quantidade" id="quantidade'.$sql_prod['code'].'">
+                                          <span class="input-group-btn">
+                                            <a href="#" class="btn btn-info" onclick="addProdPedido(\'$(#quantidade'.$sql_prod['code'].').val()\')">
+                                                <span class="glyphicon glyphicon-plus"></span> Adicionar a lista de pedidos
+                                            </a>
+                                          </span>
+                                        </div>
+                                    </div>
+                                </td>';
 
-                    if($efetuar_pedido){
+                    if ($efetuar_pedido) {
 
                         $pedido_efetuado = false;
 
-                        foreach ($qtd_cdh as $c_ind => $p_val){
-                            if($c_ind == $ind){
+                        foreach ($qtd_cdh as $c_ind => $p_val) {
+                            if ($c_ind == $ind) {
                                 $pedido_efetuado = true;
                             }
                         }
-                        if($pedido_efetuado){
+                        if ($pedido_efetuado) {
                             $str .= '<td><div class="alert alert-success" role="alert"><i class="glyphicon glyphicon-ok"></i> Pedido do produto efetuado</div></td>';
-                        }
-                        else{
+                        } else {
                             $str .= '<td><div class="alert alert-danger" role="alert"><i class="glyphicon glyphicon-remove"></i> Pedido do produto nao efetuado</div></td>';
                         }
                     }
@@ -313,12 +327,12 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, $vl_credito, MySqlPDO $db)
 {
 
     $post = array(
-        'acao' => 'car_lista_item',
-        'idconsultor' => HND_USER,
-        'ss_pg' => $ss_pg,
-        'id_cdhret' => $val_cdh,
+        'acao'         => 'car_lista_item',
+        'idconsultor'  => HND_USER,
+        'ss_pg'        => $ss_pg,
+        'id_cdhret'    => $val_cdh,
         'atv_cad_cons' => '1',
-        'atv_cons' => '1'
+        'atv_cons'     => '1'
     );
 
     $result = executaAcaoProdutos($post, $cookieFile, true);
@@ -387,10 +401,10 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, $vl_credito, MySqlPDO $db)
     $valor_total_pedido = number_format($valor_total_pedido_calc, 2, '.', '');
 
     $post = array(
-        'acao' => 'calc_frete_list_transp',
-        'ss_pg' => $ss_pg,
-        'peso_ped' => $peso_total_pedido,
-        'cep_entr' => '',
+        'acao'      => 'calc_frete_list_transp',
+        'ss_pg'     => $ss_pg,
+        'peso_ped'  => $peso_total_pedido,
+        'cep_entr'  => '',
         'id_cdhret' => $val_cdh,
     );
 
@@ -407,29 +421,29 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, $vl_credito, MySqlPDO $db)
     $cdh_info = getCdh($val_cdh, $db);
 
     $post = array(
-        'sessao_tipo_compra' => '1',
-        'ss_pg' => $ss_pg,
-        HND_USER => 'sessao_id_cons',
-        'atv_cons' => '1',
-        'atv_cons_bkp' => '1',
-        'atv_cad_cons' => '1',
-        'atv_cad_cons_bkp' => '1',
-        'sessao_modo_entrega' => '2',
+        'sessao_tipo_compra'          => '1',
+        'ss_pg'                       => $ss_pg,
+        HND_USER                      => 'sessao_id_cons',
+        'atv_cons'                    => '1',
+        'atv_cons_bkp'                => '1',
+        'atv_cad_cons'                => '1',
+        'atv_cad_cons_bkp'            => '1',
+        'sessao_modo_entrega'         => '2',
         //'sessao_nome_cons'            => 'JULIANNA DALMA BORGES VIANNA', // fazer corretamente
-        'id_cdh_retira' => $val_cdh,
-        'id_cdh_retira_desc' => $cdh_info['description'],
+        'id_cdh_retira'               => $val_cdh,
+        'id_cdh_retira_desc'          => $cdh_info['description'],
         //'email_ped'                   => 'julianna_dalma@hotmail.com', // fazer corretamente
-        'cdh_retira_email' => $cdh_info['email'],
-        'vl_total_pedido_frete' => '0.00',
-        'vl_sub_total_pedido' => $valor_subtotal_pedido,
-        'vl_total_pedido' => $valor_total_pedido,
-        'pontos_total_pedido' => $pontos_total_pedido,
-        'peso_total_pedido' => $peso_total_pedido,
-        'forma_envio_transp_ped' => $vtrans,
+        'cdh_retira_email'            => $cdh_info['email'],
+        'vl_total_pedido_frete'       => '0.00',
+        'vl_sub_total_pedido'         => $valor_subtotal_pedido,
+        'vl_total_pedido'             => $valor_total_pedido,
+        'pontos_total_pedido'         => $pontos_total_pedido,
+        'peso_total_pedido'           => $peso_total_pedido,
+        'forma_envio_transp_ped'      => $vtrans,
         'forma_envio_transp_desc_ped' => $vtrans_desc,
-        'prazo_transp_ped' => $vtrans_prazo,
-        'vl_credito' => $vl_credito,
-        'vl_credito_usado' => $valor_credito_usado,
+        'prazo_transp_ped'            => $vtrans_prazo,
+        'vl_credito'                  => $vl_credito,
+        'vl_credito_usado'            => $valor_credito_usado,
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -459,37 +473,37 @@ function efetuaPedido($cookieFile, $val_cdh, $ss_pg, $vl_credito, MySqlPDO $db)
     $desc_forma_pag = $find_desc_forma_pag[0]->attr['value'];
 
     $post = array(
-        'acao' => 'gera_pedido',
-        'idconsultor' => HND_USER,
-        'ss_pg' => $ss_pg,
-        'sessao_modo_entrega' => '2',
+        'acao'                        => 'gera_pedido',
+        'idconsultor'                 => HND_USER,
+        'ss_pg'                       => $ss_pg,
+        'sessao_modo_entrega'         => '2',
         //'nome_cons'                   => 'JULIANNA DALMA BORGES VIANNA', // fazer corretamente
-        'id_cdhret' => $val_cdh,
-        'id_cdhret_desc' => $cdh_info['description'],
-        'id_forma_pag' => $pagamento,
-        'desc_forma_pag' => $desc_forma_pag,
-        'vl_frete' => '0.00',
-        'vl_ped' => $valor_total_pedido,
-        'vl_sub_ped' => $valor_subtotal_pedido,
-        'pontos_ped' => $pontos_total_pedido,
-        'peso_ped' => $peso_total_pedido,
-        'prazo_transp_ped' => $vtrans_prazo,
-        'forma_envio_transp_ped' => $vtrans,
-        'qtd_parc' => '1',
-        'status_ped' => '1',
+        'id_cdhret'                   => $val_cdh,
+        'id_cdhret_desc'              => $cdh_info['description'],
+        'id_forma_pag'                => $pagamento,
+        'desc_forma_pag'              => $desc_forma_pag,
+        'vl_frete'                    => '0.00',
+        'vl_ped'                      => $valor_total_pedido,
+        'vl_sub_ped'                  => $valor_subtotal_pedido,
+        'pontos_ped'                  => $pontos_total_pedido,
+        'peso_ped'                    => $peso_total_pedido,
+        'prazo_transp_ped'            => $vtrans_prazo,
+        'forma_envio_transp_ped'      => $vtrans,
+        'qtd_parc'                    => '1',
+        'status_ped'                  => '1',
         'forma_envio_transp_desc_ped' => $vtrans_desc,
         //'email_ped'                   => 'julianna_dalma@hotmail.com', // fazer corretamente
-        'email_cdh' => $cdh_info['email'],
-        'vl_credito_usado' => $valor_credito_usado,
-        'ped_juros' => '0',
-        'ped_tipo' => 'CONSULTOR>HINODE',
-        'qtd_parc_auto' => '0',
-        'valorDesconto' => '',
-        'valorExcedente' => '',
-        'tipoKit' => '0',
-        'vtel' => '',
-        'idlogcons' => '',
-        'desc_forma_pag_verf' => '2',
+        'email_cdh'                   => $cdh_info['email'],
+        'vl_credito_usado'            => $valor_credito_usado,
+        'ped_juros'                   => '0',
+        'ped_tipo'                    => 'CONSULTOR>HINODE',
+        'qtd_parc_auto'               => '0',
+        'valorDesconto'               => '',
+        'valorExcedente'              => '',
+        'tipoKit'                     => '0',
+        'vtel'                        => '',
+        'idlogcons'                   => '',
+        'desc_forma_pag_verf'         => '2',
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -530,7 +544,7 @@ function getInitDados($cookieFile)
     $vl_credito = $find_vl_credito[0]->attr['value'];
 
     return array(
-        'ss_pg' => $ss_pg,
+        'ss_pg'      => $ss_pg,
         'vl_credito' => $vl_credito
     );
 }

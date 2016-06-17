@@ -82,23 +82,7 @@ if (count($sql) > 0) {
             ?>
             </tbody>
         </table>
-
-        <!--<div class="list-group">
-
-            <?php
-        /*            foreach ($sql as $ind => $val) {
-                        */ ?>
-                <a href="#" class="list-group-item"
-                   onclick="updateCodFran('<?php /*echo $val['code'] */ ?>|<?php /*echo strip_tags(preg_replace('/\s/', ' ', $val['description'] . ' - ' . $val['district'])) */ ?>,')">
-                    <h4 class="list-group-item-heading"><?php /*echo $val['description'] */ ?></h4>
-                    <p class="list-group-item-text">
-                        <?php /*echo $val['district'] . ' / ' . $val['city'] . ' / ' . $val['state'] */ ?>
-                    </p>
-                </a>
-                <?php
-        /*            }
-                    */ ?>
-        </div>-->
+        
     </div>
 
     <?php
