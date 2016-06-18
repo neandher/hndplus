@@ -384,6 +384,7 @@
                 $('#pedidos_input, #btn_nova_pesquisa').addClass('hide');
                 $('#btn_efetuar_pedido').attr('disabled', true);
                 $('#cod_pedidos, #cod_produtos').tagsinput('removeAll');
+                $('#result').html('');
             });
         });
 
