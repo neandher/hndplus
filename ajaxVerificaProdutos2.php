@@ -62,7 +62,7 @@ if (count($captcha) > 0) {
         $idconsultor = HND_USER;
 
         $searchProdutos = explode(',', $_GET['cod_produtos']);
-        
+
         $searchCDH = explode(',', $_GET['cod_franquias']);
 
         // *************** Verifica/Adiciona Produto ****************** //
@@ -115,7 +115,7 @@ if (count($captcha) > 0) {
                             );
 
                             $data_cdh[$val_cdh][] = $dadosProduto;
-                            
+
                             $post = array(
                                 'acao' => 'car_del_item',
                                 'idconsultor' => $idconsultor,
@@ -125,7 +125,7 @@ if (count($captcha) > 0) {
                                 'atv_cad_cons' => '1',
                                 'atv_cad_cons_bkp' => '1',
                             );
-    
+
                             $result = executaAcaoProdutos($post, $cookieFile, true);
                         }
                     }
@@ -157,11 +157,13 @@ if (count($captcha) > 0) {
                     $str .= '</strong></div>';
                 }
 
-                $str .= '<table class="table table-hover">
+                $str .= '<div class="table-responsive">
+                        <table class="table table-hover">
                         <tr>
                             <th style="max-width: 20%">Imagem</th>
                             <th>Nome</th>
                             <th>Codigo</th>
+                            <th></th>
                             <th></th>
                         </tr>
                         <tbody>';
@@ -177,24 +179,17 @@ if (count($captcha) > 0) {
                                 </th>
                                 <td><h4><span class="label label-success" id="txt_pro_' . $sql_prod['code'] . '">' . $sql_prod['name'] . '</span></h4></td>
                                 <td><h4><span class="label label-success">' . $sql_prod['code'] . '</span></h4></td>
-                                <td id="input_qnt_pedido_' . $sql_prod['code'] . '_' . $ind . '">
-                                    <div class="col-md-9">
-                                        <div class="input-group">
-                                          <input type="number" class="form-control" placeholder="quantidade" id="quantidade_' . $sql_prod['code'] . '_' . $ind . '">
-                                          <span class="input-group-btn">
-                                            <a href="javascript:void(0)" class="btn btn-info"';
-                    $str .= "onclick=addProdPedido($('#quantidade_" . $sql_prod['code'] . "_" . $ind . "').val(),'" . $sql_prod['code'] . "','" . $ind . "')>";
-                    $str .= '                    Adicionar pedido
-                                            </a>
-                                          </span>
-                                        </div>
-                                    </div>
+                                <td id="input_qnt_pedido_' . $sql_prod['code'] . '_' . $ind . '">    
+                                    <input type="number" class="form-control" placeholder="quantidade" id="quantidade_' . $sql_prod['code'] . '_' . $ind . '">
                                 </td>
+                                <td id="btn_add_pedido_' . $sql_prod['code'] . '_' . $ind . '"><a href="javascript:void(0)" class="btn btn-info"';
+                    $str .= "onclick=addProdPedido($('#quantidade_" . $sql_prod['code'] . "_" . $ind . "').val(),'" . $sql_prod['code'] . "','" . $ind . "')>";
+                    $str .= 'Adicionar pedido</a></td>
                               </tr>';
                 }
 
                 $str .= '</tbody></table>';
-                $str .= '</div>';
+                $str .= '</div></div>';
             }
 
             echo $str;

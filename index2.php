@@ -34,23 +34,33 @@
                 <input type="hidden" name="pesquisa_opcao" id="pesquisa_opcao">
 
                 <div class="form-group" id="produtos_input">
-                    <label for="cod_produtos" class="col-sm-1 control-label">Produtos</label>
-                    <div class="col-sm-11">
-                        <!--<textarea class="form-control" name="cod_produtos" id="cod_produtos" rows="8" ></textarea>-->
+                    <label for="cod_produtos" class="col-md-1 control-label">Produtos</label>
+                    <div class="col-md-10">
                         <input type="text" name="cod_produtos" id="cod_produtos" class="form-control">
+                    </div>
+                    <div class="col-md-1">
+                        <span class="label label-danger" style="cursor:pointer;"
+                              onclick="$('#cod_produtos').tagsinput('removeAll')">
+                            <i class="glyphicon glyphicon-remove-sign"></i> Limpar
+                        </span>
                     </div>
                 </div>
                 <div class="form-group" id="franquias_input">
-                    <label for="cod_franquias" class="col-sm-1 control-label">Franquias</label>
-                    <div class="col-sm-11">
-                        <!--<textarea class="form-control" name="cod_franquias" id="cod_franquias" rows="8">10360072,10650784,10153011,10615393,10438342</textarea>-->
+                    <label for="cod_franquias" class="col-md-1 control-label">Franquias</label>
+                    <div class="col-md-10">
                         <input type="text" name="cod_franquias" id="cod_franquias" class="form-control">
+                    </div>
+                    <div class="col-md-1">
+                        <span class="label label-danger" style="cursor: pointer"
+                              onclick="$('#cod_franquias').tagsinput('removeAll')">
+                            <i class="glyphicon glyphicon-remove-sign"></i> Limpar
+                        </span>
                     </div>
                 </div>
 
                 <div class="form-group hide" id="pedidos_input">
                     <label for="cod_pedidos" class="col-sm-1 control-label">Pedido</label>
-                    <div class="col-sm-11">
+                    <div class="col-sm-10">
                         <input type="text" name="cod_pedidos" id="cod_pedidos" class="form-control">
                     </div>
                 </div>
@@ -60,7 +70,8 @@
                 <div class="form-group">
                     <div class="col-sm-offset-1 col-sm-11">
                         <a href="#" class="btn btn-primary"
-                           onclick="$('#pesquisa_opcao').val('pesquisar_visualizar');startProcesso()" id="btn_pesquisar_visualizar">
+                           onclick="$('#pesquisa_opcao').val('pesquisar_visualizar');startProcesso()"
+                           id="btn_pesquisar_visualizar">
                             <i class="glyphicon glyphicon-search"></i> Pesquisar e Visualizar
                         </a>
 
@@ -72,16 +83,6 @@
 
                         <a href="#" class="btn btn-info hide" id="btn_nova_pesquisa">
                             <i class="glyphicon glyphicon-plus"></i> Nova Pesquisa
-                        </a>
-
-                        <a href="#" class="btn btn-danger" id="btn_rmv_prod"
-                           onclick="$('#cod_produtos').tagsinput('removeAll')">
-                            <i class="glyphicon glyphicon-remove-circle"></i> Limpar Produtos
-                        </a>
-
-                        <a href="#" class="btn btn-danger" id="btn_rmv_fran"
-                           onclick="$('#cod_franquias').tagsinput('removeAll')">
-                            <i class="glyphicon glyphicon-remove-circle"></i> Limpar Franquias
                         </a>
                     </div>
                 </div>
@@ -208,7 +209,6 @@
             switch ($('#pesquisa_opcao').val()) {
 
                 case 'pesquisar_visualizar':
-                    $('#produtos_input, #franquias_input, #btn_pesquisar_visualizar, #btn_rmv_prod, #btn_rmv_fran').hide();
                     $('#pedidos_input, #btn_nova_pesquisa').removeClass('hide');
                     executaProcesso("<?php echo BASE_URL ?>ajaxVerificaProdutos2.php");
                     break;
@@ -226,9 +226,11 @@
 
         function executaProcesso(urlAjax) {
 
+            var result = $('#result');
+
             startDate = new Date();
 
-            $('html, body').animate({scrollTop: $('#result').offset().top}, 2000);
+            $('html, body').animate({scrollTop: result.offset().top}, 2000);
 
             var result_loading = '';
 
@@ -242,7 +244,7 @@
             result_loading += '</li>';
             result_loading += '</ul>';
 
-            $('#result').html(result_loading);
+            result.html(result_loading);
 
             $.ajax({
                     type: "GET",
@@ -251,11 +253,11 @@
                 })
                 .done(function (data) {
 
-                    $('#result').html(data);
+                    result.html(data);
 
                     $('#btn_efetuar_pedido').attr('disabled', false);
 
-                    $('html, body').animate({scrollTop: $('#result').offset().top}, 2000);
+                    $('html, body').animate({scrollTop: result.offset().top}, 2000);
 
                     endDate = new Date();
 
@@ -363,11 +365,33 @@
                 }
             });
 
-            $('#cod_produtos, #cod_franquias, #cod_pedidos').tagsinput({
+            $('#cod_produtos, #cod_franquias').tagsinput({
                 tagClass: 'label label-info',
-                freeInput: true,
                 itemValue: 'id',
                 itemText: 'label'
+            });
+
+            var cod_pedidos = $('#cod_pedidos');
+
+            cod_pedidos.tagsinput({
+                tagClass: 'label label-success',
+                itemValue: 'id',
+                itemText: 'label'
+            });
+
+            cod_pedidos.on('beforeItemRemove', function (event) {
+                var tag = event.item;
+                id = tag.id.split('|');
+
+                str_html = '<input type="number" class="form-control" placeholder="quantidade" id="quantidade_' + id[0] + '_' + id[1] + '">';
+
+                $('#input_qnt_pedido_' + id[0] + '_' + id[1]).html(str_html);
+
+                str_add_pedido = '<a href="javascript:void(0)" class="btn btn-info" ';
+                str_add_pedido += 'onclick=addProdPedido($(quantidade_' + id[0] + '_' + id[1] + ').val(),\''+id[0]+'\',\''+id[1]+'\')>';
+                str_add_pedido += 'Adicionar pedido</a>';
+
+                $('#btn_add_pedido_' + id[0] + '_' + id[1]).html(str_add_pedido);
             });
 
             $.getJSON("<?php echo BASE_URL ?>ajaxGetFranFav.php", function (data) {
@@ -380,7 +404,6 @@
             });
 
             $('#btn_nova_pesquisa').click(function () {
-                $('#produtos_input, #franquias_input, #btn_pesquisar_visualizar, #btn_rmv_prod, #btn_rmv_fran').show();
                 $('#pedidos_input, #btn_nova_pesquisa').addClass('hide');
                 $('#btn_efetuar_pedido').attr('disabled', true);
                 $('#cod_pedidos, #cod_produtos').tagsinput('removeAll');
@@ -462,17 +485,26 @@
         }
 
         function addProdPedido(qtd, cod_prod, cod_fran) {
+
+            tag_id = cod_prod + '|' + cod_fran + '|' + qtd + '|';
+            tag_label = $('#txt_fra_' + cod_fran).html() + ' - ' + $('#txt_pro_' + cod_prod).html() + ' (' + cod_prod + ') - Quantidade: ' + qtd;
+
             $("#cod_pedidos").tagsinput(
                 'add', {
-                    id: cod_prod + '|' + cod_fran + '|' + qtd + '|',
-                    label: $('#txt_fra_' + cod_fran).html() + ' - ' + $('#txt_pro_' + cod_prod).html() + ' ('+cod_prod+') - Quantidade: ' + qtd
+                    id: tag_id,
+                    label: tag_label
                 }
             );
 
             $('#input_qnt_pedido_' + cod_prod + '_' + cod_fran).html('<h4><span class="label label-warning"><i class="glyphicon glyphicon-ok"></i> Adicionado ' + qtd + ' itens</span></h4>');
+
+            str_rmv_pedido = '<a href="javascript:void(0)" class="btn btn-danger"';
+            str_rmv_pedido += 'onclick=$(\'#cod_pedidos\').tagsinput(\'remove\',{id:\''+tag_id+'\'})>';
+            str_rmv_pedido += 'Remover pedido</a>';
+
+            $('#btn_add_pedido_' + cod_prod + '_' + cod_fran).html(str_rmv_pedido);
         }
 
     </script>
 
     <?php include('footer.phtml') ?>
-
