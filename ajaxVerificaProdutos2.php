@@ -136,7 +136,7 @@ if (count($captcha) > 0) {
         if (count($data_cdh) > 0) {
 
             $str = '<div class="page-header">
-                        <h1>Resultado da Pesquisa</h1>
+                        <h2>Resultado da Pesquisa</h2>
                         <p>Adicione a quantidade de produtos que deseja pedir na franquia que melhor lhe atenda</p>
                     </div>';
 
@@ -197,7 +197,7 @@ if (count($captcha) > 0) {
             unlink($cookieFile);
 
         } else {
-            echo '<div class="alert alert-danger" role="alert">Nenhum produto encontrado!</div>';
+            echo 'false';
         }
     } else {
         echo 'Houve um erro ao acessar o sistema da hinode. Erro 2';

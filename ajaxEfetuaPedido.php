@@ -7,7 +7,7 @@ ini_set('display_errors', 1);
 require_once("ajaxIncludes.php");
 
 //var_dump($_GET);
-//exit;
+exit;
 
 $cookieFile = TEMP_PATH . session_id() . '.txt';
 
@@ -34,10 +34,10 @@ if (count($captcha) > 0) {
 
     $post = array(
         'login_tipo_id' => 'idconsultor',
-        'rede_usuario'  => HND_USER,
-        'rede_senha'    => HND_PASS,
-        'txtValor'      => $captchaDecode,
-        'entrar'        => 'Entrar'
+        'rede_usuario' => HND_USER,
+        'rede_senha' => HND_PASS,
+        'txtValor' => $captchaDecode,
+        'entrar' => 'Entrar'
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -66,7 +66,24 @@ if (count($captcha) > 0) {
 
         $idconsultor = HND_USER;
 
-        $pedidos = explode(',', $_GET['cod_pedidos']);
+        $get_pedidos = '';
+
+        if ($_GET['pesquisa_opcao'] == 'pesquisa_automatica') {
+
+            foreach (explode(',', $_GET['cod_franquias']) as $franquia) {
+                if (!empty($franquia)) {
+                    foreach ($_GET as $ind => $val) {
+                        if (substr($ind, 0, 13) == 'pes_auto_qtd_') {
+                            $get_pedidos .= substr($ind, 13, strlen($ind)) . '|' . $franquia . '|' . $val . ',';
+                        }
+                    }
+                }
+            }
+        } else {
+            $get_pedidos = $_GET['cod_pedidos'];
+        }
+
+        $pedidos = explode(',', $get_pedidos);
 
         $pedidos_efetuados = array();
 
@@ -84,7 +101,7 @@ if (count($captcha) > 0) {
 
                 $cdh_data[$cdh][] = array(
                     'pro_code' => $pedidos_valores[0],
-                    'pro_qtd'  => $pedidos_valores[2]
+                    'pro_qtd' => $pedidos_valores[2]
                 );
             }
         }
@@ -104,19 +121,19 @@ if (count($captcha) > 0) {
                     while ($i <= $produto_valores['pro_qtd'] && $reservado) {
 
                         $post = array(
-                            'acao'             => 'car_add_item',
-                            'idconsultor'      => $idconsultor,
-                            'id_cdhret'        => $cdh,
-                            'loc_prod'         => $produto_valores['pro_code'],
-                            'qtd_prod'         => '1',
-                            'ss_pg'            => $initDados['ss_pg'],
-                            'regra_estoque'    => '0',
-                            'atv_cons'         => $initDados['atv_cons'],
-                            'atv_cad_cons'     => $initDados['atv_cad_cons'],
-                            'vl_sub_ped'       => '0.00',
+                            'acao' => 'car_add_item',
+                            'idconsultor' => $idconsultor,
+                            'id_cdhret' => $cdh,
+                            'loc_prod' => $produto_valores['pro_code'],
+                            'qtd_prod' => '1',
+                            'ss_pg' => $initDados['ss_pg'],
+                            'regra_estoque' => '0',
+                            'atv_cons' => $initDados['atv_cons'],
+                            'atv_cad_cons' => $initDados['atv_cad_cons'],
+                            'vl_sub_ped' => '0.00',
                             'valor_minimo_kit' => '0.00',
                             'ponto_minimo_kit' => '0.00',
-                            'atv_cons_bkp'     => $initDados['atv_cons_bkp'],
+                            'atv_cons_bkp' => $initDados['atv_cons_bkp'],
                             'atv_cad_cons_bkp' => $initDados['atv_cad_cons_bkp'],
                         );
 
@@ -132,7 +149,7 @@ if (count($captcha) > 0) {
                     if ($i > 1) {
                         $pedidos_efetuados[$cdh][] = array(
                             'pro_code' => $produto_valores['pro_code'],
-                            'pro_qtd'  => ($i - 1)
+                            'pro_qtd' => ($i - 1)
                         );
                     }
                 }
@@ -140,7 +157,7 @@ if (count($captcha) > 0) {
                 if (isset($pedidos_efetuados[$cdh]) && count($pedidos_efetuados[$cdh]) > 0) {
 
                     $post = array(
-                        'acao'  => 'validar-carrinho',
+                        'acao' => 'validar-carrinho',
                         'ss_pg' => $initDados['ss_pg'],
                     );
 
@@ -322,12 +339,12 @@ function getProd($cod, MySqlPDO $db)
 function efetuaPedido($cookieFile, $val_cdh, $initDados, MySqlPDO $db)
 {
     $post = array(
-        'acao'         => 'car_lista_item',
-        'idconsultor'  => HND_USER,
-        'ss_pg'        => $initDados['ss_pg'],
-        'id_cdhret'    => $val_cdh,
+        'acao' => 'car_lista_item',
+        'idconsultor' => HND_USER,
+        'ss_pg' => $initDados['ss_pg'],
+        'id_cdhret' => $val_cdh,
         'atv_cad_cons' => $initDados['atv_cad_cons'],
-        'atv_cons'     => $initDados['atv_cons'] // caso nao esteja ativo deve ser 0 / caso ativo deve ser 1
+        'atv_cons' => $initDados['atv_cons'] // caso nao esteja ativo deve ser 0 / caso ativo deve ser 1
     );
 
     $result = executaAcaoProdutos($post, $cookieFile, true);
@@ -407,10 +424,10 @@ function efetuaPedido($cookieFile, $val_cdh, $initDados, MySqlPDO $db)
     $valor_total_pedido = number_format($valor_total_pedido_calc, 2, '.', '');
 
     $post = array(
-        'acao'      => 'calc_frete_list_transp',
-        'ss_pg'     => $initDados['ss_pg'],
-        'peso_ped'  => $peso_total_pedido,
-        'cep_entr'  => '',
+        'acao' => 'calc_frete_list_transp',
+        'ss_pg' => $initDados['ss_pg'],
+        'peso_ped' => $peso_total_pedido,
+        'cep_entr' => '',
         'id_cdhret' => $val_cdh,
     );
 
@@ -427,29 +444,29 @@ function efetuaPedido($cookieFile, $val_cdh, $initDados, MySqlPDO $db)
     $cdh_info = getCdh($val_cdh, $db);
 
     $post = array(
-        'sessao_tipo_compra'          => '1',
-        'ss_pg'                       => $initDados['ss_pg'],
-        HND_USER                      => 'sessao_id_cons',
-        'atv_cons'                    => $initDados['atv_cons'],
-        'atv_cons_bkp'                => $initDados['atv_cons_bkp'],
-        'atv_cad_cons'                => $initDados['atv_cad_cons'],
-        'atv_cad_cons_bkp'            => $initDados['atv_cons_bkp'],
-        'sessao_modo_entrega'         => '2',
+        'sessao_tipo_compra' => '1',
+        'ss_pg' => $initDados['ss_pg'],
+        HND_USER => 'sessao_id_cons',
+        'atv_cons' => $initDados['atv_cons'],
+        'atv_cons_bkp' => $initDados['atv_cons_bkp'],
+        'atv_cad_cons' => $initDados['atv_cad_cons'],
+        'atv_cad_cons_bkp' => $initDados['atv_cons_bkp'],
+        'sessao_modo_entrega' => '2',
         //'sessao_nome_cons'            => 'JULIANNA DALMA BORGES VIANNA', // fazer corretamente
-        'id_cdh_retira'               => $val_cdh,
-        'id_cdh_retira_desc'          => $cdh_info['description'],
+        'id_cdh_retira' => $val_cdh,
+        'id_cdh_retira_desc' => $cdh_info['description'],
         //'email_ped'                   => 'julianna_dalma@hotmail.com', // fazer corretamente
-        'cdh_retira_email'            => $cdh_info['email'],
-        'vl_total_pedido_frete'       => '0.00',
-        'vl_sub_total_pedido'         => $valor_subtotal_pedido,
-        'vl_total_pedido'             => $valor_total_pedido,
-        'pontos_total_pedido'         => $pontos_total_pedido,
-        'peso_total_pedido'           => $peso_total_pedido,
-        'forma_envio_transp_ped'      => $vtrans,
+        'cdh_retira_email' => $cdh_info['email'],
+        'vl_total_pedido_frete' => '0.00',
+        'vl_sub_total_pedido' => $valor_subtotal_pedido,
+        'vl_total_pedido' => $valor_total_pedido,
+        'pontos_total_pedido' => $pontos_total_pedido,
+        'peso_total_pedido' => $peso_total_pedido,
+        'forma_envio_transp_ped' => $vtrans,
         'forma_envio_transp_desc_ped' => $vtrans_desc,
-        'prazo_transp_ped'            => $vtrans_prazo,
-        'vl_credito'                  => $vl_credito,
-        'vl_credito_usado'            => $valor_credito_usado,
+        'prazo_transp_ped' => $vtrans_prazo,
+        'vl_credito' => $vl_credito,
+        'vl_credito_usado' => $valor_credito_usado,
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -479,38 +496,38 @@ function efetuaPedido($cookieFile, $val_cdh, $initDados, MySqlPDO $db)
     $desc_forma_pag = $find_desc_forma_pag[0]->attr['value'];
 
     $post = array(
-        'acao'                        => 'gera_pedido',
-        'idconsultor'                 => HND_USER,
-        'ss_pg'                       => $initDados['ss_pg'],
-        'sessao_modo_entrega'         => '2',
+        'acao' => 'gera_pedido',
+        'idconsultor' => HND_USER,
+        'ss_pg' => $initDados['ss_pg'],
+        'sessao_modo_entrega' => '2',
         //'nome_cons'                   => 'JULIANNA DALMA BORGES VIANNA', // fazer corretamente
-        'id_cdhret'                   => $val_cdh,
-        'id_cdhret_desc'              => $cdh_info['description'],
-        'id_forma_pag'                => $pagamento,
-        'desc_forma_pag'              => $desc_forma_pag,
-        'vl_frete'                    => '0.00',
-        'vl_ped'                      => $valor_total_pedido,
-        'vl_sub_ped'                  => $valor_subtotal_pedido,
-        'pontos_ped'                  => $pontos_total_pedido,
-        'peso_ped'                    => $peso_total_pedido,
-        'prazo_transp_ped'            => $vtrans_prazo,
-        'forma_envio_transp_ped'      => $vtrans,
-        'qtd_parc'                    => '1',
+        'id_cdhret' => $val_cdh,
+        'id_cdhret_desc' => $cdh_info['description'],
+        'id_forma_pag' => $pagamento,
+        'desc_forma_pag' => $desc_forma_pag,
+        'vl_frete' => '0.00',
+        'vl_ped' => $valor_total_pedido,
+        'vl_sub_ped' => $valor_subtotal_pedido,
+        'pontos_ped' => $pontos_total_pedido,
+        'peso_ped' => $peso_total_pedido,
+        'prazo_transp_ped' => $vtrans_prazo,
+        'forma_envio_transp_ped' => $vtrans,
+        'qtd_parc' => '1',
         //'qtd_parcela_card'            => '1',
-        'status_ped'                  => '1',
+        'status_ped' => '1',
         'forma_envio_transp_desc_ped' => $vtrans_desc,
         //'email_ped'                   => 'julianna_dalma@hotmail.com', // fazer corretamente
-        'email_cdh'                   => $cdh_info['email'],
-        'vl_credito_usado'            => $valor_credito_usado,
-        'ped_juros'                   => '0',
-        'ped_tipo'                    => 'CONSULTOR>HINODE',
-        'qtd_parc_auto'               => '0',
-        'valorDesconto'               => '',
-        'valorExcedente'              => '',
-        'tipoKit'                     => '0',
-        'vtel'                        => '',
-        'idlogcons'                   => HND_USER,
-        'desc_forma_pag_verf'         => '2',
+        'email_cdh' => $cdh_info['email'],
+        'vl_credito_usado' => $valor_credito_usado,
+        'ped_juros' => '0',
+        'ped_tipo' => 'CONSULTOR>HINODE',
+        'qtd_parc_auto' => '0',
+        'valorDesconto' => '',
+        'valorExcedente' => '',
+        'tipoKit' => '0',
+        'vtel' => '',
+        'idlogcons' => HND_USER,
+        'desc_forma_pag_verf' => '2',
     );
 
     $post_fields = http_build_query($post, null, '&');
@@ -564,7 +581,7 @@ function getInitDados($cookieFile)
     //
 
     $post = array(
-        'acao'        => 'ver_atv_consultor',
+        'acao' => 'ver_atv_consultor',
         'idconsultor' => HND_USER
     );
 
@@ -590,12 +607,12 @@ function getInitDados($cookieFile)
     }
 
     return array(
-        'ss_pg'            => $ss_pg,
-        'vl_credito'       => $vl_credito,
-        'atv_cad_cons'     => $atv_cad_cons,
+        'ss_pg' => $ss_pg,
+        'vl_credito' => $vl_credito,
+        'atv_cad_cons' => $atv_cad_cons,
         'atv_cad_cons_bkp' => $atv_cad_cons_bkp,
-        'atv_cons'         => $atv_cons,
-        'atv_cons_bkp'     => $atv_cons_bkp
+        'atv_cons' => $atv_cons,
+        'atv_cons_bkp' => $atv_cons_bkp
     );
 }
 
