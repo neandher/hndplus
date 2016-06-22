@@ -66,7 +66,7 @@
 
                 <hr>
 
-                <div class="form-group">
+                <div class="form-group" id="bnts_options">
                     <div class="col-md-offset-1 col-md-11">
                         <a href="javascript:void(0)" class="btn btn-primary"
                            onclick="$('#pesquisa_opcao').val('pesquisar_visualizar');startProcesso()"
@@ -74,7 +74,7 @@
                             <i class="glyphicon glyphicon-search"></i> Pesquisar e Visualizar
                         </a>
 
-                        <a href="javascript:void(0)" class="btn btn-success" id="btn_efetuar_pedido" disabled="disabled"
+                        <a href="javascript:void(0)" class="btn btn-success hide" id="btn_efetuar_pedido"
                            data-toggle="modal"
                            data-target="#confirma_pedido_modal">
                             <i class="glyphicon glyphicon-ok"></i> Efetuar Pedido
@@ -97,7 +97,7 @@
 
         <div id="result"></div>
 
-        <div id="pesquisa_automatica_opcoes" class="hide"></div>
+        <div id="pesquisa_automatica_opcoes"></div>
 
     </form>
 
@@ -162,8 +162,7 @@
 
                             </div>
 
-                            <div role="tabpanel" class="tab-pane" id="tab_franquias"
-                                 onclick="add($('#cod_produtos<?php echo $val['code'] ?>').val())">
+                            <div role="tabpanel" class="tab-pane" id="tab_franquias">
 
                                 <br>
 
@@ -224,21 +223,21 @@
 
         function executaProcesso(urlAjax) {
 
-            switch ($('#pesquisa_opcao').val()) {
+            pesquisa_opcao = $('#pesquisa_opcao');
+
+            switch (pesquisa_opcao.val()) {
 
                 case 'pesquisar_visualizar':
-                    $('#pedidos_input, #btn_nova_pesquisa').removeClass('hide');
-                    $('#btn_pesquisar_visualizar, #btn_nova_pesquisa').attr('disabled', true);
-
+                    $('#btn_nova_pesquisa').removeClass('hide');
                     urlAjax = '<?php echo BASE_URL ?>ajaxVerificaProdutos2.php';
                     break;
 
                 case 'pesquisar_pedido':
                     urlAjax = '<?php echo BASE_URL ?>ajaxEfetuaPedido.php';
                     break;
-                
+
                 case 'pesquisa_automatica':
-                    urlAjax = '<?php echo BASE_URL ?>ajaxEfetuaPedido.php';
+                    urlAjax = '<?php echo BASE_URL ?>ajaxPesquisaEfetuaPedidoAutomatico.php';
                     break;
             }
 
@@ -260,51 +259,91 @@
             result_loading += '</li>';
             result_loading += '</ul>';
 
-            result.html(result_loading);
+            cod_produtos_tag = $('#cod_produtos').tagsinput('items');
+            cod_franquias_tag = $('#cod_franquias').tagsinput('items');
 
-            $.ajax({
-                    type: "GET",
-                    data: $('#formSearch').serialize(),
-                    url: urlAjax
-                })
-                .done(function (data) {
+            $('#pesquisa_automatica_opcoes').hide();
 
-                    if (data == 'false') {
-                        result.html('<div class="alert alert-danger" role="alert">Nenhum produto encontrado!</div>');
-                        $('#btn_efetuar_pedido').attr('disabled', true);
-                    }
-                    else {
-                        result.html(data);
-                    }
+            if (cod_produtos_tag.length > 0 && cod_franquias_tag.length > 0) {
 
-                    $('#btn_pesquisar_visualizar, #btn_nova_pesquisa').attr('disabled', false);
+                $('#bnts_options').hide();
+                result.html(result_loading);
+                result.show();
 
-                    $('html, body').animate({scrollTop: result.offset().top}, 2000);
+                if (pesquisa_opcao.val() == 'pesquisa_automatica') {
 
-                    endDate = new Date();
+                    console.log(urlAjax)
 
-                    ms = endDate.getTime() - startDate.getTime();
+                    $.ajax({
+                            type: "GET",
+                            data: $('#formSearch').serialize(),
+                            dataType: 'json',
+                            url: '<?php echo BASE_URL ?>ajaxPesquisaEfetuaPedidoAutomatico.php'
+                        })
+                        .done(function (data) {
 
-                    s = Math.round((ms / 1000) % 60);
-                    m = Math.round((ms / (1000 * 60)) % 60);
-                    h = Math.round((ms / (1000 * 60 * 60)) % 24);
+                                console.log(data);
 
-                    if (s == 60) {
+                                $.each(data, function (i, item) {
+                                    
+                                    //aqui alterar a quantidade atual para a quantidade que ja foi pedida
+                                })
+                            }
+                        );
+                    
+                }
+                else {
+                    $.ajax({
+                            type: "GET",
+                            data: $('#formSearch').serialize(),
+                            url: urlAjax
+                        })
+                        .done(function (data) {
 
-                        s = s - 1;
-                    }
+                            $('#bnts_options').show();
 
-                    if (m == 60) {
+                            if (data == 'false') {
+                                result.html('<div class="alert alert-danger" role="alert">Nenhum produto encontrado!</div>');
+                                $('#btn_efetuar_pedido').addClass('hide');
+                                $('#pedidos_input').addClass('hide');
+                            }
+                            else {
+                                result.html(data);
+                                $('#pedidos_input').removeClass('hide');
+                                $('#btn_efetuar_pedido').removeClass('hide');
+                            }
 
-                        m = m - 1;
-                    }
+                            $('html, body').animate({scrollTop: result.offset().top}, 2000);
 
-                    txtDuracao = h + 'h ' + m + 'm ' + s + 's';
+                            endDate = new Date();
 
-                    log_duracao = h + ':' + m + ':' + s;
+                            ms = endDate.getTime() - startDate.getTime();
 
-                    $('#result').append('<div class="alert alert-info" role="alert"><p>Tempo de execucao: ' + txtDuracao + '</p></div>');
-                })
+                            s = Math.round((ms / 1000) % 60);
+                            m = Math.round((ms / (1000 * 60)) % 60);
+                            h = Math.round((ms / (1000 * 60 * 60)) % 24);
+
+                            if (s == 60) {
+
+                                s = s - 1;
+                            }
+
+                            if (m == 60) {
+
+                                m = m - 1;
+                            }
+
+                            txtDuracao = h + 'h ' + m + 'm ' + s + 's';
+
+                            log_duracao = h + ':' + m + ':' + s;
+
+                            $('#result').append('<div class="alert alert-info" role="alert"><p>Tempo de execucao: ' + txtDuracao + '</p></div>');
+                        })
+                }
+            }
+            else {
+
+            }
         }
 
         $(document).ready(function () {
@@ -417,6 +456,7 @@
             });
 
             $.getJSON("<?php echo BASE_URL ?>ajaxGetFranFav.php", function (data) {
+
                 $.each(data, function (i, item) {
                     $("#cod_franquias").tagsinput('add', {
                         id: item.code,
@@ -427,7 +467,7 @@
 
             $('#btn_nova_pesquisa').click(function () {
                 $('#pedidos_input, #btn_nova_pesquisa').addClass('hide');
-                $('#btn_efetuar_pedido').attr('disabled', true);
+                $('#btn_efetuar_pedido').addClass('hide');
                 $('#cod_pedidos, #cod_produtos').tagsinput('removeAll');
                 $('#result').html('');
             });
@@ -435,12 +475,18 @@
 
             $('#btn_pesquisa_automatica').click(function () {
 
-                $('#cod_pedidos').hide().tagsinput('removeAll');
-                $('#result').hide();
+                $('#pedidos_input').addClass('hide');
+                $('#cod_pedidos').tagsinput('removeAll');
+
+                result = $('#result');
+                result.hide();
 
                 cod_produtos_tag = $('#cod_produtos').tagsinput('items');
 
                 str_pes_auto =
+                    '<div class="page-header">' +
+                    '<h2>Pesquisa Automatica</h2>' +
+                    '</div>' +
                     '<div class="panel panel-primary"><div class="panel-heading">' +
                     '<strong>Informe a quantidade de cada produto que deseja efetuar o pedido apos estiver disponivel</strong>' +
                     '</div><div class="table-responsive">' +
@@ -470,18 +516,22 @@
                     '</div></div>' +
                     '<hr>' +
                     '<a href="javascript:void(0)" class="btn btn-primary" onclick="startPesquisaAutomatica()">' +
-                    '<i class="glyphicon glyphicon-dashboard"></i> Iniciar Pesquisa Automatica</a> ';
+                    '<i class="glyphicon glyphicon-dashboard"></i> Iniciar Pesquisa Automatica</a> <hr>';
 
-                $('#pesquisa_automatica_opcoes').removeClass('hide').html(str_pes_auto);
+                if (cod_produtos_tag.length > 0) {
+                    $('#pesquisa_automatica_opcoes').show().html(str_pes_auto);
+                }
+                else {
+                    result.show().html('<div class="alert alert-danger" role="alert">Nenhum produto selecionado!</div>');
+                }
 
             });
         });
 
-        function startPesquisaAutomatica(){
+        function startPesquisaAutomatica() {
 
             $('#pesquisa_opcao').val('pesquisa_automatica');
-            $('#pesquisa_automatica_opcoes').addClass('hide');
-            $('#result').show();
+            $('#pesquisa_automatica_opcoes').hide();
 
             startProcesso();
         }

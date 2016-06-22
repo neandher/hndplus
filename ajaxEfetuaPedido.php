@@ -7,7 +7,7 @@ ini_set('display_errors', 1);
 require_once("ajaxIncludes.php");
 
 //var_dump($_GET);
-exit;
+//exit;
 
 $cookieFile = TEMP_PATH . session_id() . '.txt';
 
@@ -66,24 +66,7 @@ if (count($captcha) > 0) {
 
         $idconsultor = HND_USER;
 
-        $get_pedidos = '';
-
-        if ($_GET['pesquisa_opcao'] == 'pesquisa_automatica') {
-
-            foreach (explode(',', $_GET['cod_franquias']) as $franquia) {
-                if (!empty($franquia)) {
-                    foreach ($_GET as $ind => $val) {
-                        if (substr($ind, 0, 13) == 'pes_auto_qtd_') {
-                            $get_pedidos .= substr($ind, 13, strlen($ind)) . '|' . $franquia . '|' . $val . ',';
-                        }
-                    }
-                }
-            }
-        } else {
-            $get_pedidos = $_GET['cod_pedidos'];
-        }
-
-        $pedidos = explode(',', $get_pedidos);
+        $pedidos = explode(',', $_GET['cod_pedidos']);
 
         $pedidos_efetuados = array();
 
@@ -199,7 +182,7 @@ if (count($captcha) > 0) {
         if (count($pedidos_efetuados) > 0) {
 
             $str = '<div class="page-header">
-                        <h1>Resultado do Pedido</h1>
+                        <h2>Resultado do Pedido</h2>
                     </div>';
 
             $cdh_check = array();
