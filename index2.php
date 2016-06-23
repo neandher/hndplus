@@ -93,8 +93,6 @@
             </div>
         </div>
 
-        <br>
-
         <div id="result"></div>
 
         <div id="pesquisa_automatica_opcoes"></div>
@@ -272,8 +270,6 @@
 
                 if (pesquisa_opcao.val() == 'pesquisa_automatica') {
 
-                    console.log(urlAjax)
-
                     $.ajax({
                             type: "GET",
                             data: $('#formSearch').serialize(),
@@ -284,13 +280,37 @@
 
                                 console.log(data);
 
-                                $.each(data, function (i, item) {
-                                    
+                                $.each(data, function (cdh, produtos) {
+
                                     //aqui alterar a quantidade atual para a quantidade que ja foi pedida
-                                })
+
+                                    //console.log(cdh + ': ' + produtos[0].pro_code + ' | ' + produtos[0].pro_qtd);
+
+                                    for (i = 0; i < produtos.length; i++) {
+                                        pro_qtd = $('#pes_auto_qtd_' + produtos[i].pro_code);
+                                        pro_qtd_val = pro_qtd.val();
+                                        pro_qtd.val(pro_qtd_val - produtos[i].pro_qtd);
+                                    }
+
+                                });
+
+                                pesquisaFinalizada = true;
+
+                                form = $('#formSearch');
+
+                                for (i = 0; i < form.elements.length; i++) {
+
+                                    nameField = form.elements[i].name + '';
+
+                                    if (nameField.substr(0, 13) == "pes_auto_qtd_-") {
+                                        if ($('#' + nameField).val() != 0) {
+                                            pesquisaFinalizada = false;
+                                        }
+                                    }
+                                }
                             }
                         );
-                    
+
                 }
                 else {
                     $.ajax({
