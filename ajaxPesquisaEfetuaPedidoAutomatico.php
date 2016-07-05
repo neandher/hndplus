@@ -62,7 +62,7 @@ if (count($captcha) > 0) {
         exit;
     }
 
-    if ($find_login[0]->attr['href'] == 'index.asp') {
+    if ($find_login[0]->attr['href'] == 'vo-inicio.asp') {
 
         //
 
@@ -120,13 +120,19 @@ if (count($captcha) > 0) {
 
                     while ($i <= $produto_valores['pro_qtd'] && $reservado && !$quantidade_atingida) {
 
+                        //echo $i . ' <= ' . $produto_valores['pro_qtd'] . ' && reservado == ' . $reservado . ' && quantidade_atingida == ' . $quantidade_atingida . '<br>';
+
                         $j = 0;
 
-                        foreach ($pedidos_efetuados as $cdh => $produto) {
-                            if ($produto_valores['pro_code'] == $produto['pro_code']) {
-                                $j += $produto['pro_qtd'];
+                        foreach ($pedidos_efetuados as $cdh => $pe_produtos) {
+                            foreach ($pe_produtos as $pe_produto) {
+                                if ($produto_valores['pro_code'] == $pe_produto['pro_code']) {
+                                    $j += $pe_produto['pro_qtd'];
+                                }
                             }
                         }
+
+                        //echo $j . ' == ' . $produto_valores['pro_qtd'] . '<br>';
 
                         if ($j == $produto_valores['pro_qtd']) {
                             $quantidade_atingida = true;
@@ -183,12 +189,13 @@ if (count($captcha) > 0) {
 
                         if ($exp[0] === '0') {
 
-                            //$pedido = efetuaPedido($cookieFile, $cdh, $initDados, $db);
+                            $pedido = efetuaPedido($cookieFile, $cdh, $initDados, $db);
 
-                            $pedido = '123|60.45';
+                            //$pedido = '123|60.45';
 
                             if (!$pedido) {
                                 $retorno_pedidos[$cdh] = false;
+                                //$pedidos_efetuados[$cdh] = array();
                             } else {
 
                                 $retorno_pedidos[$cdh]['numero_pedido'] = explode('|', $pedido)[0];
@@ -202,7 +209,7 @@ if (count($captcha) > 0) {
                 }
             }
         }
-        
+
         echo json_encode($pedidos_efetuados, JSON_UNESCAPED_UNICODE);
 
     } else {

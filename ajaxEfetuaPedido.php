@@ -58,7 +58,7 @@ if (count($captcha) > 0) {
         exit;
     }
 
-    if ($find_login[0]->attr['href'] == 'index.asp') {
+    if ($find_login[0]->attr['href'] == 'vo-inicio.asp') {
 
         //
 

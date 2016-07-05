@@ -1,17 +1,14 @@
 <?php
 
 ini_set('max_execution_time', 100000);
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require("config.php");
-require("Helpers/CurlHelper.php");
-require("Helpers/EmailHelper.php");
-require("Helpers/phpmailer/PHPMailer.php");
-require('Helpers/Simple_html_dom.php');
+require_once("ajaxIncludes.php");
 
-$cookieFile = TEMP_PATH . session_id() . '-' . $_GET['number'] . '.txt';
+//var_dump($_GET);exit;
+
+$cookieFile = TEMP_PATH . session_id() . '.txt';
 
 $url = 'https://vo.hinode.com.br/vo-2/rede_login.asp';
 
@@ -21,232 +18,193 @@ $html = new Simple_html_dom($result['exec']);
 
 $captcha = $html->find('div[id=divQuadro]');
 
-$letra1 = $captcha[0]->nodes[0]->parent->children[0]->nodes[0]->_[4];
-$letra2 = $captcha[0]->nodes[0]->parent->children[1]->nodes[0]->_[4];
-$letra3 = $captcha[0]->nodes[0]->parent->children[2]->nodes[0]->_[4];
-$letra4 = $captcha[0]->nodes[0]->parent->children[3]->nodes[0]->_[4];
+if (count($captcha) > 0) {
 
-$captchaDecode = $letra1 . $letra2 . $letra3 . $letra4;
+    $letra1 = $captcha[0]->nodes[0]->parent->children[0]->nodes[0]->_[4];
+    $letra2 = $captcha[0]->nodes[0]->parent->children[1]->nodes[0]->_[4];
+    $letra3 = $captcha[0]->nodes[0]->parent->children[2]->nodes[0]->_[4];
+    $letra4 = $captcha[0]->nodes[0]->parent->children[3]->nodes[0]->_[4];
 
-$url = 'https://vo.hinode.com.br/vo-2/rede_login1.asp';
+    $captchaDecode = $letra1 . $letra2 . $letra3 . $letra4;
 
-$post = array(
-    'login_tipo_id' => 'idconsultor',
-    'rede_usuario'  => HND_USER,
-    'rede_senha'    => HND_PASS,
-    'txtValor'      => $captchaDecode,
-    'entrar'        => 'Entrar'
-);
+    $url = 'https://vo.hinode.com.br/vo-2/rede_login1.asp';
 
-$post_fields = http_build_query($post, null, '&');
+    $post = array(
+        'login_tipo_id' => 'idconsultor',
+        'rede_usuario' => HND_USER,
+        'rede_senha' => HND_PASS,
+        'txtValor' => $captchaDecode,
+        'entrar' => 'Entrar'
+    );
 
-$result = CurlHelper::curlPost($url, $post_fields, $cookieFile);
+    $post_fields = http_build_query($post, null, '&');
 
-if (strstr($result['exec'], '<a HREF="index.asp">here</a>')) {
-
-    $url = 'https://vo.hinode.com.br/vo-2/vo3-gera-pedido.asp';
-
-    $result = CurlHelper::curl($url, false, false, $cookieFile);
+    $result = CurlHelper::curlPost($url, $post_fields, $cookieFile);
 
     $html = new Simple_html_dom($result['exec']);
 
-    $ss_pg = $html->find('input[id=ss_pg]')[0]->attr['value'];
+    $find_login = $html->find('a');
 
-    $cdh = '10360072';
+    if (!count($find_login) > 0) {
+        echo 'Houve um erro ao acessar o sistema da hinode. Erro 4';
+        exit;
+    }
 
-    $idconsultor = HND_USER;
+    if (strstr($find_login[0]->attr['href'], 'login')) {
+        echo 'Login ou senha invalidos!';
+        exit;
+    }
 
-    $searchProdutos = array(
+    if (!strstr($find_login[0]->attr['href'], 'login')) {
 
-        '010100' => 'ETERNA HINODE',
-        '010102' => 'EMPIRE HINODE',
-        '010103' => 'ETERNA BLUE HINODE',
-        '010104' => 'EMPIRE INTENSE HINODE',
+        //
 
-        '010108' => 'GRAND NOIR HINODE',
-        '010106' => 'GRAND HINODE',
+        $idconsultor = HND_USER;
 
-        '010105' => 'GRACE HINODE',
-        '010107' => 'GRACE MIDNIGHT HINODE',
+        $searchProdutos = explode(',', $_GET['cod_produtos']);
 
-        '002301'  => '01 AZZARO',
-        '002302'  => '02 KOUROS FRAICHEUR',
-        '002303'  => '03 POLO',
-        '002304'  => '04 DOLCE & GABANNA MASCULINO',
-        '002305'  => '05 CHANEL',
-        '002306'  => '06 LE MALE',
-        '002307'  => '07 POLO BLACK',
-        '002308'  => '08 DOLCE & GABANNA FEMININO',
-        '002309'  => '09 GABRIELA SABATINI',
-        '002310'  => '10 ANGEL',
-        '002312'  => '12 CAROLINA HERRERA',
-        '002313'  => '13 FANTASY',
-        '002314'  => '14 LADY MILLION',
-        '002316'  => '16 BOMBSHELL',
-        '002317'  => '17 ABERCROMBIE FIERCE',
-        '002318'  => '18 CH 212',
-        '002319'  => '19 1 MILION',
-        '002320'  => '20 FLOWER BY KENZO',
-        '002321'  => '21 HYPNOSE',
-        '002322'  => '22 VERY IRRESISTIBLE',
-        '002323'  => '23 JPG CLASSIQUE',
-        '002324'  => '24 J ADORE',
-        '002326'  => '26 ANGE OU DEMON',
-        '002328'  => '28 FERRAI BLACK',
-        '002329'  => '29 POLO BLUE',
-        '002330'  => '30 DIESEL FUEL FOR LIFE',
-        '002331'  => '31 LAPIDUS',
-        '002332'  => '32 ANIMALE',
-        '002335'  => '35 LEAU DISSEY',
-        '002337'  => '37 TRESOR',
-        '002342'  => '42 COOL WATER',
-        '002343'  => '43 JOOP! HOME',
-        '002345'  => '45 FAHRENHEIT',
-        '002346'  => '46 212 SEXY',
-        '002347'  => '47 AZZARO SILVER BLACK',
-        '002351'  => '51 EUPHORIA',
-        '002353'  => '53 BLACK XS',
-        '002355'  => '55 CH RED CAROLINA HERRERA',
-        '002356'  => '56 LADY GAGA',
-        '002357'  => '57 FAHRENHEIT SUMMER',
-        '002358'  => '58 212 SEXY MEN',
-        '002359'  => '59 ETERNITY MEN',
-        '002360'  => '60 FERRARI RED',
-        '002361'  => '61 HUGO BOSS',
-        '002362'  => '62 212 VIP MEN',
-        '002363'  => '63 212 VIP FEMININO',
-        '002364'  => '64 D&G LIGHT BLUE',
+        $searchCDH = explode(',', $_GET['cod_franquias']);
 
-        //kit top
+        // *************** Verifica/Adiciona Produto ****************** //
 
-        '007253'  => 'KIT TOP',
+        $success = false;
 
-        //hidratante
+        $a_cdh = array();
+        $data_cdh = array();
+        $check_prod = array();
 
-        //'000580'  => '580 HINODE SENSA��ES HIDRAT. DES. CORP. TERNURA - 300ml',
-        //'000581'  => '581 HINODE SENSA��ES HIDRAT. DES. CORP. SUBLIME - 300ml',
-        //'000582'  => '582 HINODE SENSA��ES HIDRAT. DES. CORP. SEDU��O - 300ml',
-        //'000583'  => '583 HINODE SENSA��ES HIDRAT. DES. CORP. DREAM VANILLA',
-        //'000584'  => '584 HINODE SENSA��ES HIDRAT. DES. CORP. PO�SIE - 300ml',
-        //'000585'  => '585 HINODE SENSA��ES HIDRAT. DES. CORP. ENVOLVENTE - 300ml',
-        //'000586'  => '586 HINODE SENSA��ES HIDRAT. DES. CORP. �CLAT - 300ml',
+        $db = new MySqlPDO();
 
-        //'000870'  => 'FRASQUEIRA HINODE	000870',
-        //'000655'  => 'KIT AMOSTRAS PERFUMES TRADU��ES GOLD	000655',
-        //'000309'  => 'Corps Lignea Gel Massageador Refrescante 500g	',
+        foreach ($searchCDH as $val_cdh) {
 
-        //'030004' => 'DIFUSOR',
-    );
+            if (!empty($val_cdh)) {
 
-    $searchProdutos = array(
+                if (!in_array($val_cdh, $a_cdh)) {
 
-        //'000870'  => 'FRASQUEIRA HINODE	000870',
-        //'000655'  => 'KIT AMOSTRAS PERFUMES TRADU��ES GOLD	000655',
-        //'000309'  => 'Corps Lignea Gel Massageador Refrescante 500g	',
-        //'000273'  => 'Joli Cupua�u - �leo em Creme Desodorante Corporal - 140g - 000273',
-        //'000291'  => 'Toques Suits Creme para Massagem 220g',
-        //'002310'  => '10',
-        //'002308'  => '08',
+                    $initDados = getInitDados($cookieFile);
 
-        //'000312'  => 'Wonderful Gold �leo para as Pernas 140ml',
+                    $a_cdh[] = $val_cdh;
 
-        //'002324'  => '24 J ADORE',
-        //'002310'  => '10 ANGEL',
-        //'002329'  => '29 POLO BLUE',
-        //'010102' => 'EMPIRE HINODE',
-        //'010104' => 'EMPIRE INTENSE HINODE',
+                    foreach ($searchProdutos as $val_prod) {
 
-        //'000277'  => 'Joli �leo Perfumado Desodorante Corporal Cupua�u 140ml',
+                        $post = array(
+                            'acao' => 'car_add_item',
+                            'idconsultor' => $idconsultor,
+                            'id_cdhret' => $val_cdh,
+                            'loc_prod' => $val_prod,
+                            'qtd_prod' => '1',
+                            'ss_pg' => $initDados['ss_pg'],
+                            'regra_estoque' => '0',
+                            'atv_cons' => '0',
+                            'atv_cad_cons' => '1',
+                            'vl_sub_ped' => '0.00',
+                            'valor_minimo_kit' => '0.00',
+                            'ponto_minimo_kit' => '0.00',
+                            'atv_cons_bkp' => '0',
+                            'atv_cad_cons_bkp' => '1',
+                        );
 
-        '16016'  => 'LINEA OCCHI L�pis para os olhos',
-        '321'  => 'Esfoliante',
-        '16005'  => '16005',
-        '16018'  => '16018',
+                        $result = executaAcaoProdutos($post, $cookieFile, true);
 
-        '000273' => '000273', // praia da costa
-        '002362' => '002362',
-        '016003' => '016003', // nao tem
-        '016070' => '016070', // nao tem
-        '016087' => '016087', // tem
-        '045001' => '045001', // tem
-        '045014' => '045014', // tem
-        '045011' => '045011',
+                        if ($result['exec'] == '') {
 
-        //'16000' => '16000',
-        //'016088' => '016088'
-    );
+                            $dadosProduto = array(
+                                'val_prod' => $val_prod,
+                                'ss_pg' => $initDados['ss_pg'],
+                                'vl_credito' => $initDados['vl_credito'],
+                            );
 
-    $searchCDH = array(
-        '10360072' => 'Vila Velha - Praia da Costa',
-        '10650784' => 'Vitoria - Praia do Canto',
-        '10153011' => 'Vitoria - Santa Lucia',
-        '10615393' => 'CARIACICA - JARDIM AMERICA',
-        '10438342' => 'SERRA - PQ RESIDENCIAL LARANJEIRAS',
-        '10930066' => 'GUARAPARI',
+                            $data_cdh[$val_cdh][] = $dadosProduto;
 
-        '10488217' => 'Cachoeiro de Itapemirim - CENTRO',
-        '10774033' => 'COLATINA - ESPLANADA',
-        '10843260' => 'LINHARES - CENTRO',
-        '10790939' => 'S�O MATEUS - SERNAMBY',
+                            $post = array(
+                                'acao' => 'car_del_item',
+                                'idconsultor' => $idconsultor,
+                                'loc_prod' => $val_prod,
+                                'qtd_prod' => '1',
+                                'ss_pg' => $initDados['ss_pg'],
+                                'atv_cad_cons' => '1',
+                                'atv_cad_cons_bkp' => '1',
+                            );
 
-        //'10164744' => ' Franquia - RJ - RIO DE JANEIRO - BANGU',
-        //'11430407' => ' RIO DAS OSTRAS | riodasostras@hinodefranquia.com.br'
-    );
-
-    // *************** Verifica/Adiciona Produto ****************** //
-
-    $success = false;
-
-    foreach ($searchCDH as $ind_cdh => $val_cdh) {
-        foreach ($searchProdutos as $ind_prod => $val_prod) {
-
-            $post = array(
-                'acao'             => 'car_add_item',
-                'idconsultor'      => $idconsultor,
-                'id_cdhret'        => $ind_cdh,
-                'loc_prod'         => $ind_prod,
-                'qtd_prod'         => '1',
-                'ss_pg'            => $ss_pg,
-                'regra_estoque'    => '0',
-                'atv_cons'         => '0',
-                'atv_cad_cons'     => '1',
-                'vl_sub_ped'       => '0.00',
-                'valor_minimo_kit' => '0.00',
-                'ponto_minimo_kit' => '0.00',
-                'atv_cons_bkp'     => '0',
-                'atv_cad_cons_bkp' => '1',
-            );
-
-            $result = executaAcaoProdutos($post, $cookieFile, true);
-
-            if ($result['exec'] == '') {
-                enviaEmail($val_prod, $val_cdh);
-                $success = true;
+                            $result = executaAcaoProdutos($post, $cookieFile, true);
+                        }
+                    }
+                }
             }
         }
+
+        if (count($data_cdh) > 0) {
+
+            $str = '<div class="page-header">
+                        <h2>Resultado da Pesquisa</h2>
+                        <p>Adicione a quantidade de produtos que deseja pedir na franquia que melhor lhe atenda</p>
+                    </div>';
+
+            $a_cdh = array();
+
+            foreach ($data_cdh as $ind => $val) {
+
+                if (!in_array($ind, $a_cdh)) {
+
+                    $cdh_info = getCdh($ind, $db);
+
+                    $a_cdh[] = $ind;
+                    $str .= '<div class="panel panel-primary"><div class="panel-heading">';
+                    $str .= '<strong><span id="txt_fra_' . $ind . '"> ' . $cdh_info['description'] . ' - ' . $cdh_info['district'] . '</span> - ' . $cdh_info['state'] . ' - Total de ' . count(
+                            $data_cdh[$ind]
+                        ) . ' iten(s)';
+
+                    $str .= '</strong></div>';
+                }
+
+                $str .= '<div class="table-responsive">
+                        <table class="table table-hover">
+                        <tr>
+                            <th style="max-width: 20%">Imagem</th>
+                            <th>Nome</th>
+                            <th>Codigo</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tbody>';
+
+                foreach ($val as $prod) {
+
+                    $sql_prod = getProd($prod['val_prod'], $db);
+
+                    $str .= '<tr>
+                                <th scope="row">
+                                <img src="https://online.hinode.com.br/produtos/' . $sql_prod['code'] . '_p.jpg" alt="' . $sql_prod['name'] . '"
+                                onerror="this.src=\'web-files/default.jpg\'">
+                                </th>
+                                <td><h4><span class="label label-success" id="txt_pro_' . $sql_prod['code'] . '">' . $sql_prod['name'] . '</span></h4></td>
+                                <td><h4><span class="label label-success">' . $sql_prod['code'] . '</span></h4></td>
+                                <td id="input_qnt_pedido_' . $sql_prod['code'] . '_' . $ind . '">    
+                                    <input type="number" class="form-control" placeholder="quantidade" id="quantidade_' . $sql_prod['code'] . '_' . $ind . '">
+                                </td>
+                                <td id="btn_add_pedido_' . $sql_prod['code'] . '_' . $ind . '"><a href="javascript:void(0)" class="btn btn-info"';
+                    $str .= "onclick=addProdPedido($('#quantidade_" . $sql_prod['code'] . "_" . $ind . "').val(),'" . $sql_prod['code'] . "','" . $ind . "')>";
+                    $str .= 'Adicionar pedido</a></td>
+                              </tr>';
+                }
+
+                $str .= '</tbody></table>';
+                $str .= '</div></div>';
+            }
+
+            echo $str;
+
+            unlink($cookieFile);
+
+        } else {
+            echo 'false';
+        }
+    } else {
+        echo 'Houve um erro ao acessar o sistema da hinode. Erro 2';
     }
-
-    if ($success) {
-        echo 'success';
-    }
-
-    // **************** Lista Carrinho *******************
-
-//    $post = array(
-//        'acao'         => 'car_lista_item',
-//        'id_cdhret'    => $cdh,
-//        'ss_pg'        => $ss_pg,
-//        'atv_cons'     => '0',
-//        'atv_cad_cons' => '1'
-//    );
-//
-//    $result = executaAcaoProdutos($post, $cookieFile, true);
-//
-//    $objectCar = json_decode($result['exec']);
-
+} else {
+    echo 'Houve um erro ao acessar o sistema da hinode. Erro 1';
 }
-
-unlink($cookieFile);
 
 function executaAcaoProdutos($post, $cookieFile, $isPost = false)
 {
@@ -262,30 +220,64 @@ function executaAcaoProdutos($post, $cookieFile, $isPost = false)
     );
 }
 
-function enviaEmail($prod, $cdh)
+function getCdh($cod, MySqlPDO $db)
 {
-    //log
+    $select = new SelectSqlHelper();
+    $select->fields = "fra.code,fra.description,fra.state,fra.district,fra.email";
+    $select->where = "fra.code = '{$cod}'";
 
-    $logFile = LOG_PATH . date('d') . '_' . date('H') . '.txt';
+    $sql = $db->read($select, 'hnd_franquia', 'fra', array(), null);
 
-    $log = $prod . ' disponivel no CDH ' . $cdh . ': ' . date('d/m/Y H:i') . PHP_EOL;
+    if (count($sql) > 0) {
+        return $sql[0];
+    }
 
-    file_put_contents($logFile, $log, FILE_APPEND);
+    return '';
+}
 
-    //Email
+function getProd($cod, MySqlPDO $db)
+{
+    $select = new SelectSqlHelper();
+    $select->fields = "pro.code,pro.name,pro.description";
+    $select->where = "pro.code = '{$cod}'";
 
-    $enviaEmail = new EmailHelper();
+    $sql = $db->read($select, 'hnd_produto', 'pro', array(), null);
 
-    $enviaEmail->setEmail('neandher89@gmail.com');
+    if (count($sql) > 0) {
+        return $sql[0];
+    }
 
-    $enviaEmail->setAssunto($prod . " disponivel");
+    return '';
+}
 
-    $msg = '
-    <br>
-    <b>Produto ' . $prod . ' disponivel no CDH ' . $cdh . ': </b> ' . date('d/m/Y H:i') . '<br><br>
-    <br><br>
-    ';
+function getInitDados($cookieFile)
+{
+    $url = 'https://vo.hinode.com.br/vo-2/vo3-gera-pedido.asp';
 
-    $enviaEmail->setMensagem($msg);
-    //$check = $enviaEmail->enviaEmail();
+    $result = CurlHelper::curl($url, false, false, $cookieFile);
+
+    $html = new Simple_html_dom($result['exec']);
+
+    $find_ss_pg = $html->find('input[id=ss_pg]');
+
+    if (!count($find_ss_pg) > 0) {
+        echo 'Houve um erro ao acessar o sistema da hinode. Erro 3';
+        exit;
+    }
+
+    $ss_pg = $find_ss_pg[0]->attr['value'];
+
+    $find_vl_credito = $html->find('input[id=vl_credito]');
+
+    if (!count($find_vl_credito) > 0) {
+        echo 'Houve um erro ao acessar o sistema da hinode. Erro 5';
+        exit;
+    }
+
+    $vl_credito = $find_vl_credito[0]->attr['value'];
+
+    return array(
+        'ss_pg' => $ss_pg,
+        'vl_credito' => $vl_credito
+    );
 }
